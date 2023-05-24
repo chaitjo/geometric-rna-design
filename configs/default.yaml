@@ -1,0 +1,104 @@
+# Misc configurations
+gpu:
+  value: 0
+  desc: GPU ID
+seed:
+  value: 42
+  desc: Random seed for reproducibility
+save:
+  value: True
+  desc: Whether to save current and best model checkpoint
+
+# Data configurations
+data_path:
+  value: "./data/"
+  desc: Data directory (preprocessed and raw)
+process_raw:
+  value: True
+  desc: Whether to process datasets from raw .pdb files
+save_processed:
+  value: True
+  desc: Whether to save processed datasets
+radius:
+  value: 4.5
+  desc: Radius for determining local neighborhoods in Angstrom (currently not used)
+top_k:
+  value: 10
+  desc: Number of k-nearest neighbors
+num_rbf:
+  value: 16
+  desc: Number of radial basis functions to featurise distances
+num_posenc:
+  value: 16
+  desc: Number of positional encodings to featurise edges
+num_conformers:
+  value: 3
+  desc: Number of conformations sampled per sequence
+
+# Splitting configurations
+eval_size:
+  value: 200
+  desc: Number of samples in val/test sets
+split:
+  value: 'rmsd'
+  desc: Type of data split (random/rmsd/struct/seq_identity)
+
+# Model configurations
+model:
+  value: 'MultiGVPGNN'
+  desc: Model architecture
+node_in_dim:
+  value: [1, 4]
+  desc: Input dimensions for node features (scalar channels, vector channels)
+node_h_dim:
+  value: [128, 16]
+  desc: Hidden dimensions for node features (scalar channels, vector channels)
+edge_in_dim:
+  value: [32, 1]
+  desc: Input dimensions for edge features (scalar channels, vector channels)
+edge_h_dim:
+  value: [32, 1]
+  desc: Hidden dimensions for edge features (scalar channels, vector channels)
+num_layers:
+  value: 3
+  desc: Number of layers for encoder/decoder
+drop_rate:
+  value: 0.1
+  desc: Dropout rate
+out_dim:
+  value: 4
+  desc: Output dimension (4 bases for RNA)
+
+# Training configurations
+epochs:
+  value: 100
+  desc: Number of training epochs
+lr:
+  value: 0.001
+  desc: Learning rate
+batch_size:
+  value: 8
+  desc: Batch size for dataloaders (currently not used)
+max_nodes:
+  value: 5000
+  desc: Maximum number of nodes in batch
+num_workers:
+  value: 8
+  desc: Number of workers for dataloaders
+val_every:
+  value: 5
+  desc: Interval of training epochs after which validation is performed
+
+# Evaluation configurations
+model_path:
+  value: ''
+  desc: Path to model checkpoint (for testing)
+test_perplexity:
+  value: False
+  desc: Whether to test perplexity
+test_recovery:
+  value: False
+  desc: Whether to test recovery
+n_samples:
+  value: 100
+  desc: Number of samples for testing recovery
