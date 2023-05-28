@@ -27,7 +27,7 @@ Check out the accompanying paper ['Multi-State RNA Design with Geometric Multi-G
 |
 └── src
     ├── models.py           # Multi-GNN encoder layers and model
-    ├── train               # Helper functions for training and evaluation
+    ├── train.py            # Helper functions for training and evaluation
     ├── data.py             # RNA inverse design dataset
     ├── data_utils.py       # Helper functions for data preparation
     └── featurisation.py    # Input featurisation helpers
