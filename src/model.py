@@ -1,7 +1,7 @@
 ################################################################
 # Generalisation of Geometric Vector Perceptron, Jing et al.
 # for explicit multi-state biomolecule representation learning.
-# Orginal repository: https://github.com/drorlab/gvp-pytorch
+# Original repository: https://github.com/drorlab/gvp-pytorch
 ################################################################
 
 import functools
