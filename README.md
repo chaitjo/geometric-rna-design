@@ -8,7 +8,7 @@ gRNAde explicitly accounts for RNA conformational flexibility via a novel **mult
 Check out the accompanying paper ['Multi-State RNA Design with Geometric Multi-Graph Neural Networks'](https://arxiv.org/abs/2305.14749), which introduces gRNAde.
 > Chaitanya K. Joshi, Arian R. Jamasb, Ramon Viñas, Charles Harris, Simon Mathis, and Pietro Liò. Multi-State RNA Design with Geometric Multi-Graph Neural Networks. *arXiv preprint, 2023.*
 >
->[PDF](https://arxiv.org/pdf/2305.14749.pdf) |
+>[PDF](https://arxiv.org/pdf/2305.14749.pdf) | [Thread](https://twitter.com/chaitjo/status/1662118334412800001)
 
 ❗️**Note:** gRNAde is under active development.
 
