@@ -58,17 +58,23 @@ def train(config, model, train_loader, val_loader, test_loader, device):
     print(f'BEST EPOCH {best_epoch} VAL loss: {best_val_loss:.4f} perp: {np.exp(best_val_loss):.4f} acc: {best_val_acc:.4f}')
     if config.save:
         # Evaluate best checkpoint on test set
-        print(f"TESTING: loading from {os.path.join(wandb.run.dir, 'best_checkpoint.h5')}")
+        print(f"EVALUATION: loading from {os.path.join(wandb.run.dir, 'best_checkpoint.h5')}")
         model.load_state_dict(torch.load(os.path.join(wandb.run.dir, 'best_checkpoint.h5')))
         model.eval()
         with torch.no_grad():
-            test_loss, test_acc, test_confusion = loop(model, test_loader, None, device)
-        print(f'BEST EPOCH {best_epoch} TEST loss: {test_loss:.4f} perp: {np.exp(test_loss):.4f} acc: {test_acc:.4f}')
-        print_confusion(test_confusion, lookup=lookup)
-        
-        # Evaluate recovery on test set
-        recovery = test_recovery(model, test_loader.dataset, config.n_samples, device)
-        wandb.log({ "test_recovery_median": np.median(recovery), "test_recovery_mean": np.mean(recovery), "test_recovery_std": np.std(recovery), "epoch": best_epoch })
+            # test_loss, test_acc, test_confusion = loop(model, test_loader, None, device)
+            # print(f'BEST EPOCH {best_epoch} TEST loss: {test_loss:.4f} perp: {np.exp(test_loss):.4f} acc: {test_acc:.4f}')
+            # print_confusion(test_confusion, lookup=lookup)
+
+            # Evaluate recovery on validation set
+            recovery = test_recovery(model, val_loader.dataset, config.n_samples, device)
+            wandb.log({ "val_recovery_median": np.median(recovery), "val_recovery_mean": np.mean(recovery), "val_recovery_std": np.std(recovery), "epoch": best_epoch })
+            torch.save(recovery, os.path.join(wandb.run.dir, "val_recovery.h5"))
+            
+            # Evaluate recovery on test set
+            recovery = test_recovery(model, test_loader.dataset, config.n_samples, device)
+            wandb.log({ "test_recovery_median": np.median(recovery), "test_recovery_mean": np.mean(recovery), "test_recovery_std": np.std(recovery), "epoch": best_epoch })
+            torch.save(recovery, os.path.join(wandb.run.dir, "test_recovery.h5"))
 
 
 def loop(model, dataloader, optimizer=None, device='cpu'):
@@ -89,14 +95,14 @@ def loop(model, dataloader, optimizer=None, device='cpu'):
             torch.cuda.empty_cache()
             continue
         
-        logits, seq = logits[batch.mask], batch.seq[batch.mask]
+        logits, seq = logits[batch.mask_coords], batch.seq[batch.mask_coords]
         loss_value = loss_fn(logits, seq)
 
         if optimizer:
             loss_value.backward()
             optimizer.step()
 
-        num_nodes = int(batch.mask.sum())
+        num_nodes = int(batch.mask_coords.sum())
         total_loss += float(loss_value.item()) * num_nodes
         total_count += num_nodes
         pred = torch.argmax(logits, dim=-1).detach().cpu().numpy()
@@ -113,7 +119,7 @@ def test_perplexity(model, dataloader, device):
     model.eval()
     with torch.no_grad():
         loss, acc, confusion = loop(model, dataloader, None, device)
-    print(f'TEST perplexity: {np.exp(loss):.4f}')
+    print(f'EVAL perplexity: {np.exp(loss):.4f}')
     print_confusion(confusion, lookup=dataloader.dataset.num_to_letter)
     return np.exp(loss)
 
@@ -127,7 +133,7 @@ def test_recovery(model, dataset, n_samples, device):
         recovery_ = sample.eq(data.seq).float().mean().cpu().numpy()
         recovery.append(recovery_)
         t.set_description(f"{np.median(recovery):.4f}")
-    print(f'TEST recovery median: {np.median(recovery):.4f} mean: {np.mean(recovery):.4f} +- {np.std(recovery):.4f}')
+    print(f'EVAL recovery median: {np.median(recovery):.4f} mean: {np.mean(recovery):.4f} +- {np.std(recovery):.4f}')
     return recovery
 
 
