@@ -12,6 +12,7 @@ import torch_cluster
 from Bio import SeqIO
 from Bio.PDB.PDBParser import PDBParser
 
+from src.data_utils import *
 from src.featurisation import *
 
 
@@ -23,7 +24,7 @@ class RNADesignDataset(data.Dataset):
     Returned graphs are of type `torch_geometric.data.Data` with attributes:
     - pos        C4' carbon coordinates, shape [n_nodes, n_conf, 3]
     - seq        sequence converted to int tensor, shape [n_nodes]
-    - node_s     node scalar features, shape [n_nodes, n_conf, 1] 
+    - node_s     node scalar features, shape [n_nodes, n_conf, 64] 
     - node_v     node vector features, shape [n_nodes, n_conf, 4, 3]
     - edge_s     edge scalar features, shape [n_edges, n_conf, 32]
     - edge_v     edge vector features, shape [n_edges, n_conf, 1, 3]
@@ -84,21 +85,18 @@ class RNADesignDataset(data.Dataset):
             )
 
             # Set of coordinates: num_conf x num_res x 3 x 3
-            # coords_list = get_k_random_entries(rna['coords_list'], k = self.num_conformers)
-            # TODO reimplement sampling with replacements + masking 
-            coords_list = random.choices(
-                rna['coords_list'], 
-                k = self.num_conformers, 
-            )
+            coords_list, mask_confs = get_k_random_entries(rna['coords_list'], k = self.num_conformers)
             coords_list = torch.as_tensor(
-                np.array(coords_list), 
+                coords_list, 
                 device=self.device, 
                 dtype=torch.float32
             )
+            # Mask extra coordinates if fewer than num_conf: num_res x num_conf
+            mask_confs = torch.BoolTensor(mask_confs).repeat(len(seq), 1)
 
             # Mask missing values: num_res
-            mask = torch.isfinite(coords_list.sum(dim=(0,2,3)))
-            coords_list[:, ~mask] = np.inf
+            mask_coords = torch.isfinite(coords_list.sum(dim=(0,2,3)))
+            coords_list[:, ~mask_coords] = np.inf
             
             # C4' coordinates as node positions: num_conf x num_res x 3
             coord_C_list = coords_list[:, :, 1]
@@ -107,14 +105,24 @@ class RNADesignDataset(data.Dataset):
             edge_index = torch.LongTensor()
             for coord in coord_C_list:
                 edge_index = torch.concat(
-                    [edge_index, torch_cluster.knn_graph(coord, 10)],
+                    [edge_index, torch_cluster.knn_graph(coord, self.top_k)],
                     dim = 1,
                 )
             edge_index = torch_geometric.utils.coalesce(edge_index)
 
-            # Node attributres: num_res x num_conf x 2 x 3, each
-            orientations = get_orientations(coord_C_list).permute(1, 0, 2, 3)
-            sidechains = get_sidechains(coords_list).permute(1, 0, 2, 3)
+            # Node attributres: distances and displacement vectors along backbone
+            fwd_dist, bck_dist, fwd_vec, bck_vec = get_backbone_dist_and_vec(coord_C_list)
+            fwd_rbf = rbf(fwd_dist.permute(1, 0), D_count=self.num_rbf)  # num_res x num_conf x num_rbf
+            bck_rbf = rbf(bck_dist.permute(1, 0), D_count=self.num_rbf)  # num_res x num_conf x num_rbf
+            fwd_vec = fwd_vec.unsqueeze_(-2).permute(1, 0, 2, 3)         # num_res x num_conf x 1 x 3
+            bck_vec = bck_vec.unsqueeze_(-2).permute(1, 0, 2, 3)         # num_res x num_conf x 1 x 3
+            
+            # Node attributres: distances and displacement within nucleotide
+            CN_dist, CP_dist, CN_vec, CP_vec = get_C_to_NP_dist_and_vec(coords_list)
+            CN_rbf = rbf(CN_dist.permute(1, 0), D_count=self.num_rbf)    # num_res x num_conf x num_rbf
+            CP_rbf = rbf(CP_dist.permute(1, 0), D_count=self.num_rbf)    # num_res x num_conf x num_rbf
+            CN_vec = CN_vec.unsqueeze_(-2).permute(1, 0, 2, 3)           # num_res x num_conf x 1 x 3
+            CP_vec = CP_vec.unsqueeze_(-2).permute(1, 0, 2, 3)           # num_res x num_conf x 1 x 3
             
             # Reshape coord_C_list: num_res x num_conf x 3
             coord_C_list = coord_C_list.permute(1, 0, 2)
@@ -126,23 +134,26 @@ class RNADesignDataset(data.Dataset):
             # Edge positional encodings: num_edges x num_conf x num_posenc
             edge_posenc = get_posenc(edge_index, self.num_posenc).unsqueeze_(1).repeat(1, self.num_conformers, 1)
             
-            node_s = torch.zeros(coord_C_list.shape[0], coord_C_list.shape[1], 1)
-            node_v = torch.cat([orientations, sidechains], dim=-2)
+            node_s = torch.cat([fwd_rbf, bck_rbf, CN_rbf, CP_rbf], dim=-1)
+            node_v = torch.cat([fwd_vec, bck_vec, CN_vec, CP_vec], dim=-2)
             edge_s = torch.cat([edge_rbf, edge_posenc], dim=-1)
             edge_v = normalize(edge_vectors).unsqueeze(-2)
             node_s, node_v, edge_s, edge_v = map(
                 torch.nan_to_num,
                 (node_s, node_v, edge_s, edge_v)
             )
+
+            # NOTE: if we want to move to e3nn, we need to combine _s and _v features.
             
         data = torch_geometric.data.Data(
             seq = seq,                  # num_res x 1
-            node_s = node_s,            # num_res x num_conf x 1
+            node_s = node_s,            # num_res x num_conf x 64
             node_v = node_v,            # num_res x num_conf x 4 x 3
             edge_s = edge_s,            # num_edges x num_conf x 32
             edge_v = edge_v,            # num_edges x num_conf x 1 x 3
             edge_index = edge_index,    # 2 x num_edges
-            mask = mask                 # num_res x 1
+            mask_coords = mask_coords,  # num_res
+            mask_confs = mask_confs,    # num_res x num_conf
         )
         return data
 

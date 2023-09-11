@@ -112,16 +112,23 @@ def get_avg_rmsds(data_list):
 
 
 def get_k_random_entries(arr_list, k):
-    # TODO reimplement this sampling with masking
+    """
+    :param arr_list: List of np.array entries
+    :param k: number of random entries to be selected from arr_list
+    """
     n = len(arr_list)
-    if k >= n:
-        # If k is greater than or equal to the length of the list,
-        # return all the entries in the list along with arrays of zeros
-        # to pad up to k
+    arr_list = np.array(arr_list)
+    if k > n:
+        # If k is greater than the length of the list,
+        # return all the entries in the list and pad zeros up to k
         zeros_arr = np.zeros_like(arr_list[0])
-        return arr_list + [zeros_arr] * (k - n)
+        entries_list = np.concatenate((arr_list, [zeros_arr] * (k - n)), axis=0)
+        mask = [1]*n + [0]*(k - n)
     else:
-        # If k is less than the length of the list, randomly select k entries
-        return np.random.choice(arr_list, size=k, replace=False)
-        # TODO this doesn't actually work b/c arr_list cannot be a multidimensional array
-        # However, this is easy to fix by chosing randomly some indices and then indexing your list/array of arrays
+        # If k is less than or equal to the length of the list, 
+        # randomly select k entries
+        rand_idx = np.random.choice(n, size=k, replace=False)
+        entries_list =  arr_list[rand_idx]
+        mask = [1]*k
+
+    return entries_list, mask

@@ -5,6 +5,7 @@ import torch.nn.functional as F
 
 
 def get_posenc(edge_index, num_posenc=16):
+    # Positional encoding along backbone
     # From https://github.com/jingraham/neurips19-graph-protein-design
     num_posenc = num_posenc
     d = edge_index[0] - edge_index[1]
@@ -18,20 +19,20 @@ def get_posenc(edge_index, num_posenc=16):
     return E
 
 
-def get_orientations(X):
+def get_backbone_dist_and_vec(X):
+    # Relative distance and displacement along backbone
     # X : num_conf x num_res x 3
-    forward = normalize(X[:, 1:] - X[:, :-1])
-    backward = normalize(X[:, :-1] - X[:, 1:])
-    forward = F.pad(forward, [0, 0, 0, 1])
-    backward = F.pad(backward, [0, 0, 1, 0])
-    return torch.cat([forward.unsqueeze(-2), backward.unsqueeze(-2)], -2)
+    forward = F.pad(X[:, 1:] - X[:, :-1], [0, 0, 0, 1])
+    backward = F.pad(X[:, :-1] - X[:, 1:], [0, 0, 1, 0])
+    return forward.norm(dim=-1), backward.norm(dim=-1), normalize(forward), normalize(backward)
 
 
-def get_sidechains(X):
+def get_C_to_NP_dist_and_vec(X):
+    # Relative distance and displacements within nucleotide
     # X : num_conf x num_res x 3 x 3
     p, origin, n = X[:, :, 0], X[:, :, 1], X[:, :, 2]
-    n, p = normalize(n - origin), normalize(p - origin)
-    return torch.cat([n.unsqueeze_(-2), p.unsqueeze_(-2)], -2)
+    n, p = n - origin, p - origin
+    return n.norm(dim=-1), p.norm(dim=-1), normalize(n), normalize(p)
 
 
 def normalize(tensor, dim=-1):
@@ -49,8 +50,6 @@ def rbf(D, D_min=0., D_max=20., D_count=16, device='cpu'):
     Returns an RBF embedding of `torch.Tensor` `D` along a new axis=-1.
     That is, if `D` has shape [...dims], then the returned tensor will have
     shape [...dims, D_count].
-    
-    TODO switch to DimeNet RBFs
     '''
     D_mu = torch.linspace(D_min, D_max, D_count, device=device)
     D_mu = D_mu.view([1, -1])
