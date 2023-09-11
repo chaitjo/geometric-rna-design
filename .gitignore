@@ -1,5 +1,6 @@
 # Custom
 /data
+/seq
 /env
 /wandb
 .DS_Store

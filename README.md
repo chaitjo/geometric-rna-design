@@ -10,7 +10,7 @@ Check out the accompanying paper ['Multi-State RNA Design with Geometric Multi-G
 >
 >[PDF](https://arxiv.org/pdf/2305.14749.pdf) | [Thread](https://twitter.com/chaitjo/status/1662118334412800001)
 
-❗️**Note:** gRNAde is under active development.
+❗️**Note:** gRNAde is under active development; the `main` branch contains the most recent version of the code and models, but the manuscript may not be updated with the latest results. Please check the ['Releases'](https://github.com/chaitjo/geometric-rna-design/releases) tab to reproduce our results.
 
 
 ## Directory Structure and Usage

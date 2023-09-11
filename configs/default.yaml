@@ -37,18 +37,18 @@ num_conformers:
 
 # Splitting configurations
 eval_size:
-  value: 200
+  value: 100
   desc: Number of samples in val/test sets
 split:
-  value: 'rmsd'
-  desc: Type of data split (random/rmsd/struct/seq_identity)
+  value: 'seqid_rmsd'
+  desc: Type of data split (rmsd/struct)
 
 # Model configurations
 model:
-  value: 'MultiGVPGNN'
-  desc: Model architecture
+  value: 'NAR'
+  desc: Model architecture (AR/NAR)
 node_in_dim:
-  value: [1, 4]
+  value: [64, 4]
   desc: Input dimensions for node features (scalar channels, vector channels)
 node_h_dim:
   value: [128, 16]
@@ -60,7 +60,7 @@ edge_h_dim:
   value: [32, 1]
   desc: Hidden dimensions for edge features (scalar channels, vector channels)
 num_layers:
-  value: 3
+  value: 4
   desc: Number of layers for encoder/decoder
 drop_rate:
   value: 0.1
