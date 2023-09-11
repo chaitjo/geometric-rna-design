@@ -15,9 +15,9 @@ from torch_scatter import scatter_add
 
 #########################################################################
 
-class MultiGVPGNN(torch.nn.Module):
+class AutoregressiveMultiGNN(torch.nn.Module):
     '''
-    GVP-GNN for **multiple** structure-conditioned autoregressive RNA design.
+    Autoregressive GVP-GNN for **multiple** structure-conditioned RNA design.
     
     Takes in RNA structure graphs of type `torch_geometric.data.Data` 
     or `torch_geometric.data.Batch` and returns a categorical distribution
@@ -37,7 +37,7 @@ class MultiGVPGNN(torch.nn.Module):
     '''
     def __init__(
         self,
-        node_in_dim = (1, 4), 
+        node_in_dim = (64, 4), 
         node_h_dim = (128, 16), 
         edge_in_dim = (32, 1), 
         edge_h_dim = (32, 1),
@@ -99,11 +99,11 @@ class MultiGVPGNN(torch.nn.Module):
 
         for layer in self.encoder_layers:
             h_V = layer(h_V, edge_index, h_E)  # (n_nodes, n_conf, d_s), (n_nodes, n_conf, d_v, 3)
-        
-        # Pool multi-conformation features
-        h_V = (h_V[0].mean(dim=1), h_V[1].mean(dim=1))  # (n_nodes, d_s), (n_nodes, d_v, 3)
-        h_E = (h_E[0].mean(dim=1), h_E[1].mean(dim=1))  # (n_edges, d_se), (n_edges, d_ve, 3)
-        # TODO implement masking
+
+        # Pool multi-conformation features: 
+        # nodes: (n_nodes, d_s), (n_nodes, d_v, 3)
+        # edges: (n_edges, d_se), (n_edges, d_ve, 3)
+        h_V, h_E = self.pool_multi_conf(h_V, h_E, batch.mask_confs, edge_index)
 
         encoder_embeddings = h_V
         
@@ -124,7 +124,7 @@ class MultiGVPGNN(torch.nn.Module):
         Samples sequences autoregressively from the distribution
         learned by the model.
         
-        :param batch: mini-batch
+        :param batch: mini-batch (only supports one sample at a time)
         :param n_samples: number of samples
         :param temperature: temperature to use in softmax 
                             over the categorical distribution
@@ -140,7 +140,7 @@ class MultiGVPGNN(torch.nn.Module):
             edge_index = batch.edge_index
         
             device = edge_index.device
-            L = h_V[0].shape[0]
+            num_nodes = h_V[0].shape[0]
             
             h_V = self.W_v(h_V)  # (n_nodes, n_conf, d_s), (n_nodes, n_conf, d_v, 3)
             h_E = self.W_e(h_E)  # (n_edges, n_conf, d_se), (n_edges, n_conf, d_ve, 3)
@@ -149,36 +149,36 @@ class MultiGVPGNN(torch.nn.Module):
                 h_V = layer(h_V, edge_index, h_E)  # (n_nodes, n_conf, d_s), (n_nodes, n_conf, d_v, 3)
             
             # Pool multi-conformation features
-            h_V = (h_V[0].mean(dim=1), h_V[1].mean(dim=1))  # (n_nodes, d_s), (n_nodes, d_v, 3)
-            h_E = (h_E[0].mean(dim=1), h_E[1].mean(dim=1))  # (n_edges, d_se), (n_edges, d_ve, 3)
-            # TODO implement masking
+            h_V, h_E = self.pool_multi_conf(h_V, h_E, batch.mask_confs, edge_index)
             
+            # Repeat features for sampling n_samples times
             h_V = (h_V[0].repeat(n_samples, 1),
                    h_V[1].repeat(n_samples, 1, 1))
-            
             h_E = (h_E[0].repeat(n_samples, 1),
                    h_E[1].repeat(n_samples, 1, 1))
             
+            # Expand edge index for autoregressive decoding
             edge_index = edge_index.expand(n_samples, -1, -1)
-            offset = L * torch.arange(n_samples, device=device).view(-1, 1, 1)
+            offset = num_nodes * torch.arange(n_samples, device=device).view(-1, 1, 1)
             edge_index = torch.cat(tuple(edge_index + offset), dim=-1)
             
-            seq = torch.zeros(n_samples * L, device=device, dtype=torch.int)
-            h_S = torch.zeros(n_samples * L, self.out_dim, device=device)
+            seq = torch.zeros(n_samples * num_nodes, device=device, dtype=torch.int)
+            h_S = torch.zeros(n_samples * num_nodes, self.out_dim, device=device)
     
             h_V_cache = [(h_V[0].clone(), h_V[1].clone()) for _ in self.decoder_layers]
             
-            for i in range(L):
+            # Decode one token at a time
+            for i in range(num_nodes):
                 
                 h_S_ = h_S[edge_index[0]]
                 h_S_[edge_index[0] >= edge_index[1]] = 0
                 h_E_ = (torch.cat([h_E[0], h_S_], dim=-1), h_E[1])
                         
-                edge_mask = edge_index[1] % L == i
+                edge_mask = edge_index[1] % num_nodes == i
                 edge_index_ = edge_index[:, edge_mask]
                 h_E_ = tuple_index(h_E_, edge_mask)
-                node_mask = torch.zeros(n_samples * L, device=device, dtype=torch.bool)
-                node_mask[i::L] = True
+                node_mask = torch.zeros(n_samples * num_nodes, device=device, dtype=torch.bool)
+                node_mask[i::num_nodes] = True
                 
                 for j, layer in enumerate(self.decoder_layers):
                     out = layer(h_V_cache[j], edge_index_, h_E_,
@@ -187,14 +187,37 @@ class MultiGVPGNN(torch.nn.Module):
                     out = tuple_index(out, node_mask)
                     
                     if j < len(self.decoder_layers)-1:
-                        h_V_cache[j+1][0][i::L] = out[0]
-                        h_V_cache[j+1][1][i::L] = out[1]
+                        h_V_cache[j+1][0][i::num_nodes] = out[0]
+                        h_V_cache[j+1][1][i::num_nodes] = out[1]
                     
                 logits = self.W_out(out)
-                seq[i::L] = Categorical(logits=logits / temperature).sample()
-                h_S[i::L] = self.W_s(seq[i::L])
+                seq[i::num_nodes] = Categorical(logits=logits / temperature).sample()
+                h_S[i::num_nodes] = self.W_s(seq[i::num_nodes])
                 
-            return seq.view(n_samples, L)
+            return seq.view(n_samples, num_nodes)
+        
+    def pool_multi_conf(self, h_V, h_E, mask_confs, edge_index):
+        
+        # True num_conf for masked mean pooling
+        n_conf_true = mask_confs.sum(1, keepdim=True)  # (n_nodes, 1)
+        
+        # Mask scalar features
+        mask = mask_confs.unsqueeze(2)  # (n_nodes, n_conf, 1)
+        h_V0 = h_V[0] * mask
+        h_E0 = h_E[0] * mask[edge_index[0]]
+
+        # Mask vector features
+        mask = mask.unsqueeze(3)  # (n_nodes, n_conf, 1, 1)
+        h_V1 = h_V[1] * mask
+        h_E1 = h_E[1] * mask[edge_index[0]]
+        
+        # Average pooling multi-conformation features
+        h_V = (h_V0.sum(dim=1) / n_conf_true,               # (n_nodes, d_s)
+               h_V1.sum(dim=1) / n_conf_true.unsqueeze(2))  # (n_nodes, d_v, 3)
+        h_E = (h_E0.sum(dim=1) / n_conf_true[edge_index[0]],               # (n_edges, d_se)
+               h_E1.sum(dim=1) / n_conf_true[edge_index[0]].unsqueeze(2))  # (n_edges, d_ve, 3)
+
+        return h_V, h_E
 
 #########################################################################
 
