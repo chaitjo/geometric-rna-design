@@ -15,6 +15,158 @@ from torch_scatter import scatter_add
 
 #########################################################################
 
+class NonAutoregressiveMultiGNN(torch.nn.Module):
+    '''
+    Non-Autoregressive GVP-GNN for **multiple** structure-conditioned RNA design.
+    
+    Takes in RNA structure graphs of type `torch_geometric.data.Data` 
+    or `torch_geometric.data.Batch` and returns a categorical distribution
+    over 4 bases at each position in a `torch.Tensor` of shape [n_nodes, 4].
+    
+    The standard forward pass requires sequence information as input
+    and should be used for training or evaluating likelihood.
+    For sampling or design, use `self.sample`.
+    
+    :param node_in_dim: node dimensions in input graph
+    :param node_h_dim: node dimensions to use in GVP-GNN layers
+    :param node_in_dim: edge dimensions in input graph
+    :param edge_h_dim: edge dimensions to embed in GVP-GNN layers
+    :param num_layers: number of GVP-GNN layers in encoder/decoder
+    :param drop_rate: rate to use in all dropout layers
+    :param out_dim: output dimension (4 bases)
+    '''
+    def __init__(
+        self,
+        node_in_dim = (64, 4), 
+        node_h_dim = (128, 16), 
+        edge_in_dim = (32, 1), 
+        edge_h_dim = (32, 1),
+        num_layers = 3, 
+        drop_rate = 0.1,
+        out_dim = 4,
+    ):
+        super().__init__()
+        self.node_in_dim = node_in_dim
+        self.node_h_dim = node_h_dim
+        self.edge_in_dim = edge_in_dim
+        self.edge_h_dim = edge_h_dim
+        self.num_layers = num_layers
+        self.out_dim = out_dim
+        activations = (F.relu, None)
+        
+        # Node input embedding
+        self.W_v = torch.nn.Sequential(
+            LayerNorm(self.node_in_dim),
+            GVP(self.node_in_dim, self.node_h_dim,
+                activations=(None, None), vector_gate=True)
+        )
+
+        # Edge input embedding
+        self.W_e = torch.nn.Sequential(
+            LayerNorm(self.edge_in_dim),
+            GVP(self.edge_in_dim, self.edge_h_dim, 
+                activations=(None, None), vector_gate=True)
+        )
+        
+        # Encoder layers (supports multiple conformations)
+        self.encoder_layers = nn.ModuleList(
+                MultiGVPConvLayer(self.node_h_dim, self.edge_h_dim, 
+                                  activations=activations, vector_gate=True,
+                                  drop_rate=drop_rate)
+            for _ in range(num_layers))
+        
+        # Output
+        self.W_out = torch.nn.Sequential(
+            LayerNorm(self.node_h_dim),
+            GVP(self.node_h_dim, self.node_h_dim,
+                activations=(None, None), vector_gate=True),
+            GVP(self.node_h_dim, (self.out_dim, 0), 
+                activations=(None, None))   
+        )
+    
+    def forward(self, batch):
+
+        h_V = (batch.node_s, batch.node_v)
+        h_E = (batch.edge_s, batch.edge_v)
+        edge_index = batch.edge_index
+        
+        h_V = self.W_v(h_V)  # (n_nodes, n_conf, d_s), (n_nodes, n_conf, d_v, 3)
+        h_E = self.W_e(h_E)  # (n_edges, n_conf, d_se), (n_edges, n_conf, d_ve, 3)
+
+        for layer in self.encoder_layers:
+            h_V = layer(h_V, edge_index, h_E)  # (n_nodes, n_conf, d_s), (n_nodes, n_conf, d_v, 3)
+
+        # Pool multi-conformation features: 
+        # nodes: (n_nodes, d_s), (n_nodes, d_v, 3)
+        # edges: (n_edges, d_se), (n_edges, d_ve, 3)
+        h_V, h_E = self.pool_multi_conf(h_V, h_E, batch.mask_confs, edge_index)
+
+        logits = self.W_out(h_V)  # (n_nodes, out_dim)
+        
+        return logits
+    
+    def sample(self, batch, n_samples, temperature=0.1):
+        '''
+        Samples sequences from the distribution learned by the model.
+        
+        :param batch: mini-batch (only supports one sample at a time)
+        :param n_samples: number of samples
+        :param temperature: temperature to use in softmax 
+                            over the categorical distribution
+        
+        :return: int `torch.Tensor` of shape [n_samples, n_nodes] based on the
+                 residue-to-int mapping of the original training data
+        '''
+        
+        with torch.no_grad():
+
+            h_V = (batch.node_s, batch.node_v)
+            h_E = (batch.edge_s, batch.edge_v)
+            edge_index = batch.edge_index
+        
+            h_V = self.W_v(h_V)  # (n_nodes, n_conf, d_s), (n_nodes, n_conf, d_v, 3)
+            h_E = self.W_e(h_E)  # (n_edges, n_conf, d_se), (n_edges, n_conf, d_ve, 3)
+            
+            for layer in self.encoder_layers:
+                h_V = layer(h_V, edge_index, h_E)  # (n_nodes, n_conf, d_s), (n_nodes, n_conf, d_v, 3)
+            
+            # Pool multi-conformation features
+            h_V, h_E = self.pool_multi_conf(h_V, h_E, batch.mask_confs, edge_index)
+            
+            logits = self.W_out(h_V)  # (n_nodes, out_dim)
+
+            logits /= temperature
+            probs = F.softmax(logits, dim=-1)
+
+            seq = torch.multinomial(probs, n_samples, replacement=True)  # (n_nodes, n_samples)
+                
+            return seq.permute(1, 0)
+        
+    def pool_multi_conf(self, h_V, h_E, mask_confs, edge_index):
+        
+        # True num_conf for masked mean pooling
+        n_conf_true = mask_confs.sum(1, keepdim=True)  # (n_nodes, 1)
+        
+        # Mask scalar features
+        mask = mask_confs.unsqueeze(2)  # (n_nodes, n_conf, 1)
+        h_V0 = h_V[0] * mask
+        h_E0 = h_E[0] * mask[edge_index[0]]
+
+        # Mask vector features
+        mask = mask.unsqueeze(3)  # (n_nodes, n_conf, 1, 1)
+        h_V1 = h_V[1] * mask
+        h_E1 = h_E[1] * mask[edge_index[0]]
+        
+        # Average pooling multi-conformation features
+        h_V = (h_V0.sum(dim=1) / n_conf_true,               # (n_nodes, d_s)
+               h_V1.sum(dim=1) / n_conf_true.unsqueeze(2))  # (n_nodes, d_v, 3)
+        h_E = (h_E0.sum(dim=1) / n_conf_true[edge_index[0]],               # (n_edges, d_se)
+               h_E1.sum(dim=1) / n_conf_true[edge_index[0]].unsqueeze(2))  # (n_edges, d_ve, 3)
+
+        return h_V, h_E
+
+#########################################################################
+
 class AutoregressiveMultiGNN(torch.nn.Module):
     '''
     Autoregressive GVP-GNN for **multiple** structure-conditioned RNA design.
