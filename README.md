@@ -57,6 +57,12 @@ pip install biopython wandb pyyaml ipdb
 conda install jupyterlab -c conda-forge
 conda install -c bioconda cd-hit
 
+# Install US-align and qTMclust to cluster structures
+cd $MY_PROGRAMS_DIR  # Download US-align to your choice of directory (e.g., `~/Programs/`)
+git clone https://github.com/pylelab/USalign.git && cd USalign/ && git checkout 97325d3aad852f8a4407649f25e697bbaa17e186
+g++ -static -O3 -ffast-math -lm -o USalign USalign.cpp
+g++ -static -O3 -ffast-math -lm -o qTMclust qTMclust.cpp
+
 # Install PyG (Check CPU/GPU/MacOS)
 # Option 1: CPU, MacOS
 # pip install torch-scatter torch-sparse torch-cluster torch-spline-conv -f https://data.pyg.org/whl/torch-1.12.0+cpu.html 
