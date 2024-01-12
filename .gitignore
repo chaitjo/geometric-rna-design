@@ -1,8 +1,8 @@
 # Custom
+/tools
 /data
-/seq
-/env
 /wandb
+/slurm
 .DS_Store
 # *.ipynb
 
