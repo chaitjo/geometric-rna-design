@@ -1,0 +1,95 @@
+program: main.py
+method: grid
+name: gRNAde_sweep
+description: "gRNAde W&B sweep template"
+
+entity: chaitjo
+project: gRNAde
+
+parameters:
+  
+  # Misc configurations
+  gpu:
+    value: 0
+  seed:
+    values: 
+    - 0
+    - 9
+    - 42
+  save:
+    value: True
+
+  # Data configurations
+  data_path:
+    value: "./data/"
+  radius:
+    value: 4.5
+  top_k:
+    value: 32
+  num_rbf:
+    value: 32
+  num_posenc:
+    value: 32
+  max_num_conformers:
+    values: 
+    - 1
+    - 2
+    - 3
+    - 5
+  noise_scale:
+    value: 0.1
+  max_nodes_batch:
+    value: 3000
+  max_nodes_sample:
+    value: 5000
+
+  # Splitting configurations
+  split:
+    values: 
+    - 'das'
+    - 'structsim'
+    - 'seqid'
+
+  # Model configurations
+  model:
+    values: 
+    - 'NARv1'
+    - 'ARv1'
+  node_in_dim:
+    value: [15, 4]  # (num_bb_atoms x 5, 2 + num_bb_atoms - 1)
+  node_h_dim:
+    value: [128, 16]
+  edge_in_dim:
+    value: [131, 3]  # (num_bb_atoms x num_rbf + num_posenc + num_bb_atoms, num_bb_atoms)
+  edge_h_dim:
+    value: [64, 4]
+  num_layers:
+    value: 4
+  drop_rate:
+    value: 0.5
+  out_dim:
+    value: 4
+
+  # Training configurations
+  epochs:
+    value: 50
+  lr:
+    value: 0.0001
+  label_smoothing:
+    value: 0.05
+  batch_size:
+    value: 8
+  num_workers:
+    value: 16
+  val_every:
+    value: 5
+
+  # Evaluation configurations
+  model_path:
+    value: ''
+  evaluate:
+    value: False
+  n_samples:
+    value: 16
+  temperature:
+    value: 0.1
