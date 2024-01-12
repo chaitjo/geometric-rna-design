@@ -1,0 +1,15 @@
+idx,pdb_id,description,farna_recovery,rosetta_recovery,grnade_recovery,grnade_perplexity,grnade_sc_score
+0,1CSL,RRE high affinity site,0.2,0.44,0.48798075,1.5431457,0.48438537
+1,1ET4,Vitamin B12 binding RNA aptamer,0.34,0.44,0.4888393,1.3895409,0.2947684
+2,1F27,Biotin-binding RNA pseudoknot,0.36,0.37,0.52840906,1.3720044,0.8838928
+3,1L2X,Viral RNA pseudoknot,0.45,0.48,0.44473138,1.4270079,0.506806
+4,1LNT,RNA internal loop of SRP,0.27,0.53,0.33333334,1.7813637,0.42029488
+5,1Q9A,Sarcin/ricin domain from E.coli 23S rRNA,0.4,0.41,0.584375,1.3398834,-0.009120237
+6,4FE5,Guanine riboswitch aptamer,0.28,0.36,0.6732595,1.280845,0.72662294
+7,1X9C,All-RNA hairpin ribozyme,0.31,0.5,0.54861116,1.4857256,0.9294003
+8,1XPE,HIV-1 B RNA dimerization initiation site,0.24,0.4,0.47209823,1.4159923,0.21275955
+9,2GCS,Pre-cleavage state of glmS ribozyme,0.26,0.44,0.4232143,1.6359441,0.04411963
+10,2GDI,Thiamine pyrophosphate-specific riboswitch,0.38,0.48,0.51250005,1.6060407,0.06963852
+11,2OEU,Junctionless hairpin ribozyme,0.3,0.37,0.56490386,1.2279652,0.5214771
+12,2R8S,Synthetic FAB bound to ribozyme domain,0.36,0.53,0.90625,1.1103754,0.7768503
+13,354D,Loop E from E. coli 5S rRNA,0.35,0.55,0.59375006,1.4561743,0.12650268
