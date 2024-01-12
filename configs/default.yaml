@@ -3,7 +3,7 @@ gpu:
   value: 0
   desc: GPU ID
 seed:
-  value: 42
+  value: 0
   desc: Random seed for reproducibility
 save:
   value: True
@@ -13,57 +13,57 @@ save:
 data_path:
   value: "./data/"
   desc: Data directory (preprocessed and raw)
-process_raw:
-  value: True
-  desc: Whether to process datasets from raw .pdb files
-save_processed:
-  value: True
-  desc: Whether to save processed datasets
 radius:
   value: 4.5
   desc: Radius for determining local neighborhoods in Angstrom (currently not used)
 top_k:
-  value: 10
+  value: 32
   desc: Number of k-nearest neighbors
 num_rbf:
-  value: 16
+  value: 32
   desc: Number of radial basis functions to featurise distances
 num_posenc:
-  value: 16
+  value: 32
   desc: Number of positional encodings to featurise edges
-num_conformers:
-  value: 3
-  desc: Number of conformations sampled per sequence
+max_num_conformers:
+  value: 1
+  desc: Maximum number of conformations sampled per sequence
+noise_scale:
+  value: 0.1
+  desc: Std of gaussian noise added to node coordinates during training
+max_nodes_batch:
+  value: 3000
+  desc: Maximum number of nodes in batch
+max_nodes_sample:
+  value: 5000
+  desc: Maximum number of nodes in batches with single samples (ie. maximum RNA length)
 
 # Splitting configurations
-eval_size:
-  value: 100
-  desc: Number of samples in val/test sets
 split:
-  value: 'seqid_rmsd'
-  desc: Type of data split (rmsd/struct)
+  value: 'das'
+  desc: Type of data split (das/structsim/seqid)
 
 # Model configurations
 model:
-  value: 'NAR'
+  value: 'ARv1'
   desc: Model architecture (AR/NAR)
 node_in_dim:
-  value: [64, 4]
+  value: [15, 4]  # (num_bb_atoms x 5, 2 + (num_bb_atoms - 1))
   desc: Input dimensions for node features (scalar channels, vector channels)
 node_h_dim:
   value: [128, 16]
   desc: Hidden dimensions for node features (scalar channels, vector channels)
 edge_in_dim:
-  value: [32, 1]
+  value: [131, 3]  # (num_bb_atoms x num_rbf + num_posenc + num_bb_atoms, num_bb_atoms)
   desc: Input dimensions for edge features (scalar channels, vector channels)
 edge_h_dim:
-  value: [32, 1]
+  value: [64, 4]
   desc: Hidden dimensions for edge features (scalar channels, vector channels)
 num_layers:
   value: 4
   desc: Number of layers for encoder/decoder
 drop_rate:
-  value: 0.1
+  value: 0.5
   desc: Dropout rate
 out_dim:
   value: 4
@@ -71,17 +71,17 @@ out_dim:
 
 # Training configurations
 epochs:
-  value: 100
+  value: 50
   desc: Number of training epochs
 lr:
-  value: 0.001
+  value: 0.0001
   desc: Learning rate
+label_smoothing:
+  value: 0.05
+  desc: Label smoothing for cross entropy loss
 batch_size:
   value: 8
   desc: Batch size for dataloaders (currently not used)
-max_nodes:
-  value: 5000
-  desc: Maximum number of nodes in batch
 num_workers:
   value: 8
   desc: Number of workers for dataloaders
@@ -92,13 +92,13 @@ val_every:
 # Evaluation configurations
 model_path:
   value: ''
-  desc: Path to model checkpoint (for testing)
-test_perplexity:
+  desc: Path to model checkpoint for evaluation or reloading
+evaluate:
   value: False
-  desc: Whether to test perplexity
-test_recovery:
-  value: False
-  desc: Whether to test recovery
+  desc: Whether to run evaluation (or training)
 n_samples:
-  value: 100
-  desc: Number of samples for testing recovery
+  value: 16
+  desc: Number of samples for evaluating recovery
+temperature:
+  value: 0.1
+  desc: Sampling temperature for evaluating recovery

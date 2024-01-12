@@ -1,103 +1,155 @@
 # 💣 gRNAde: Geometric RNA Design
 
-**gRNAde** is a geometric deep learning pipeline for 3D RNA inverse design conditioned on *multiple* backbone conformations. 
-gRNAde explicitly accounts for RNA conformational flexibility via a novel **multi-Graph Neural Network** architecture which independently encodes a set of conformers via message passing.
+**gRNAde** is a geometric deep learning pipeline for 3D RNA inverse design. 
 
-![](fig/grnade_pipeline.png)
+gRNAde generates an RNA sequence conditioned on one or more 3D RNA backbone conformations, i.e. both single- and multi-state **fixed-backbone sequence design**.
+RNA backbones are featurized as geometric graphs and processed via a multi-state GNN encoder which is equivariant to 3D roto-translation of coordinates as well as conformer order, followed by conformer order-invariant pooling and sequence design.
 
-Check out the accompanying paper ['Multi-State RNA Design with Geometric Multi-Graph Neural Networks'](https://arxiv.org/abs/2305.14749), which introduces gRNAde.
-> Chaitanya K. Joshi, Arian R. Jamasb, Ramon Viñas, Charles Harris, Simon Mathis, and Pietro Liò. Multi-State RNA Design with Geometric Multi-Graph Neural Networks. *arXiv preprint, 2023.*
+![](/tutorial/fig/grnade_pipeline.png)
+
+⚙️ Want to use gRNAde for your own RNA designs? Check out the tutorial notebook: [gRNAde 101](/tutorial/tutorial.ipynb)
+
+📄 For more details on the methodology, see the accompanying paper: ['Multi-State RNA Design with Geometric Multi-Graph Neural Networks'](https://arxiv.org/abs/2305.14749)
+> Chaitanya K. Joshi, Arian R. Jamasb, Ramon Viñas, Charles Harris, Simon Mathis, and Pietro Liò. Multi-State RNA Design with Geometric Multi-Graph Neural Networks. *ICML Computational Biology Workshop, 2023.*
 >
->[PDF](https://arxiv.org/pdf/2305.14749.pdf) | [Thread](https://twitter.com/chaitjo/status/1662118334412800001)
-
-❗️**Note:** gRNAde is under active development; the `main` branch contains the most recent version of the code and models, but the manuscript may not be updated with the latest results. Please check the ['Releases'](https://github.com/chaitjo/geometric-rna-design/releases) tab to reproduce our results.
-
-
-## Directory Structure and Usage
-
-```
-.
-├── README.md
-|
-├── data                    # Data files directory
-├── notebooks               # Jupyter notebooks directory
-├── configs                 # Configuration files directory
-| 
-├── main.py                 # Main script for launching experiments
-|
-└── src
-    ├── models.py           # Multi-GNN encoder layers and model
-    ├── train.py            # Helper functions for training and evaluation
-    ├── data.py             # RNA inverse design dataset
-    ├── data_utils.py       # Helper functions for data preparation
-    └── featurisation.py    # Input featurisation helpers
-```
+>[PDF](https://arxiv.org/pdf/2305.14749.pdf) | [Tweet](https://twitter.com/chaitjo/status/1662118334412800001)
 
 
 
 ## Installation
 
-Our experiments used Python 3.8.16 and CUDA 11.3 on NVIDIA Quadro RTX 8000 GPUs.
+In order to get started, set up a python environment by following the installation instructions below. 
+We have tested gRNAde on Linux with Python 3.10.12 and CUDA 11.8 on an NVIDIA A100 80GB GPU, as well as on MacOS.
 
 ```sh
-# Create new conda environment
-conda create --prefix ./env python=3.8
-conda activate ./env
+# Clone gRNAde repository
+cd ~  # change this to your prefered download location
+git clone https://github.com/chaitjo/geometric-rna-design.git
+cd geometric-rna-design
 
-# Install PyTorch (Check CUDA version for GPU!)
-# Option 1: CPU
-# conda install pytorch==1.12.0 -c pytorch
-#
-# Option 2: GPU, CUDA 11.3
-conda install pytorch==1.12.1 torchvision==0.13.1 torchaudio==0.12.1 cudatoolkit=11.3 -c pytorch
+# Install mamba (a faster conda)
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+bash Miniforge3-Linux-x86_64.sh
+source ~/.bashrc
+# You may also use conda or virtualenv to create your environment
 
-# Install dependencies
-conda install matplotlib pandas networkx
-pip install biopython wandb pyyaml ipdb 
-conda install jupyterlab -c conda-forge
-conda install -c bioconda cd-hit
+# Create new environment
+mamba create -n rna python=3.10
+mamba activate rna
 
-# Install PyG (Check CPU/GPU/MacOS)
-# Option 1: CPU, MacOS
-# pip install torch-scatter torch-sparse torch-cluster torch-spline-conv -f https://data.pyg.org/whl/torch-1.12.0+cpu.html 
-# pip install torch-geometric
-#
-# Option 2: GPU, CUDA 11.3
-pip install torch-scatter torch-sparse torch-cluster torch-spline-conv -f https://data.pyg.org/whl/torch-1.12.1+cu113.html
-pip install torch-geometric
-#
-# Option 3: 
-# conda install pyg -c pyg  # CPU/GPU, but may not work on MacOS
+# Install Pytorch (ensure appropriate CUDA version for your hardware)
+mamba install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
+
+# Install Pytorch Geometric (ensure matching torch + CUDA version)
+pip install torch_geometric
+pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.1.0+cu118.html
+
+# Install other dependencies
+mamba install mdanalysis MDAnalysisTests jupyterlab matplotlib seaborn pandas networkx biopython biotite torchmetrics lovely-tensors -c conda-forge
+pip install wandb pyyaml ipdb python-dotenv tqdm lmdb cpdb-protein
+
+# Install X3DNA for secondary structure determination
+cd ~/rna-inverse-folding/tools/
+tar -xvzf x3dna-v2.4-linux-64bit.tar.gz
+./x3dna-v2.4/bin/x3dna_setup
+# Follow the instructions to test your installation
+
+# Install EternaFold for secondary structure prediction
+cd ~/rna-inverse-folding/tools/
+git clone --depth=1 https://github.com/eternagame/EternaFold.git && cd EternaFold/src
+make
+# Notes: 
+# - Multithreaded version of EternaFold did not install for me
+# - To install on MacOS, start a shell in Rosetta using `arch -x86_64 zsh`
+
+# (Optional) Install CD-HIT for sequence identity clustering
+mamba install cd-hit -c bioconda
+
+# (Optional) Install US-align/qTMclust for structural similarity clustering
+cd ~/rna-inverse-folding/tools/
+git clone https://github.com/pylelab/USalign.git && cd USalign/ && git checkout 97325d3aad852f8a4407649f25e697bbaa17e186
+g++ -static -O3 -ffast-math -lm -o USalign USalign.cpp
+g++ -static -O3 -ffast-math -lm -o qTMclust qTMclust.cpp
+```
+
+Once your python environment is set up, create your `.env` file with the appropriate environment variables; see the .env.example file included in the codebase for reference. 
+```sh
+cd ~/rna-inverse-folding/
+touch .env
+```
+
+
+## Directory Structure and Usage
+
+Detailed usage instructions are available in [the tutorial notebook](/tutorial/tutorial.ipynb).
+
+```
+.
+├── README.md
+├── LICENSE
+|
+├── gRNAde.py                       # gRNAde python module and command line utility
+├── main.py                         # Main script for training models
+|
+├── .env.example                    # Example environment file
+├── .env                            # Your environment file
+|
+├── checkpoints                     # Saved model checkpoints
+├── configs                         # Configuration files directory
+├── data                            # Dataset and data files directory
+├── notebooks                       # Directory for Jupyter notebooks
+├── scripts                         # Directory for standalone scripts
+├── tutorial                        # Tutorial with example usage
+|
+├── tools                           # Directory for external tools
+|   ├── EternaFold                  # RNA sequence to secondary structure prediction
+|   └── x3dna-v2.4                  # RNA secondary structure determination from 3D
+|
+└── src                             # Source code directory
+    ├── constants.py                # Constant values for data, paths, etc.
+    ├── layers.py                   # PyTorch modules for building Multi-state GNN models
+    ├── models.py                   # Multi-state GNN models for gRNAde
+    ├── trainer.py                  # Training and evaluation loops
+    |
+    └── data                        # Data-related code
+        ├── clustering_utils.py     # Methods for clustering by sequence and structural similarity
+        ├── data_utils.py           # Methods for loading PDB files and handling coordinates
+        ├── dataset.py              # Dataset and batch sampler class
+        ├── featurizer.py           # Featurizer class
+        └── sec_struct_utils.py     # Methods for secondary structure prediction and determination
 ```
 
 
 
 ## Downloading Data
 
-We created a machine learning-ready dataset for RNA inverse design using [RNASolo](https://rnasolo.cs.put.poznan.pl) structures at resolution ≤3A. 
-Download and extract the raw `.pdb` files via the following script into the `data/raw/` directory.
-Running `main.py` for the first time will process the raw data and save the processed samples as a `.pt` file.
+gRNAde is trained on all RNA structures from the PDB at ≤4A resolution (12K 3D structures from 4.2K unique RNAs) downloaded via  [RNASolo](https://rnasolo.cs.put.poznan.pl) on 31 October 2023.
+If you would like to train your own models from scratch, download and extract the raw `.pdb` files via the following script into the `data/raw/` directory.
 
 ```sh
-mkdir data/raw
-cd data/raw
-curl -O https://rnasolo.cs.put.poznan.pl/media/files/zipped/bunches/pdb/all_member_pdb_3_0__3_280.zip
-unzip all_member_pdb_3_0__3_280.zip
-rm all_member_pdb_3_0__3_280.zip
+# Download structures in pdb format
+mkdir ~/rna-inverse-folding/data/raw
+cd ~/rna-inverse-folding/data/raw
+curl -O https://rnasolo.cs.put.poznan.pl/media/files/zipped/bunches/pdb/all_member_pdb_4_0__3_300.zip
+unzip all_member_pdb_4_0__3_300.zip
+rm all_member_pdb_4_0__3_300.zip
+
+# Process raw data into ML-ready format (this may take several hours)
+cd ~/rna-inverse-folding/
+python scripts/process_data.py
 ```
 
 Manual download link: https://rnasolo.cs.put.poznan.pl/archive.
-Select the following for creating the download: 3D (PDB) + all molecules + all members + res. ≤3.0
-
+Select the following for creating the download: 3D (PDB) + all molecules + all members + res. ≤4.0
 
 
 ## Citation
 
 ```
-@article{joshi2023multi,
+@inproceedings{joshi2023multi,
   title={Multi-State RNA Design with Geometric Multi-Graph Neural Networks},
   author={Joshi, Chaitanya K. and Jamasb, Arian R. and Viñas, Ramon and Harris, Charles and Mathis, Simon and Liò, Pietro},
-  journal={arXiv preprint arXiv:2305.14749},
+  booktitle={ICML 2023 Workshop on Computation Biology},
   year={2023},
 }
 ```
