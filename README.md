@@ -1,6 +1,6 @@
 # 💣 gRNAde: Geometric RNA Design
 
-**gRNAde** is a geometric deep learning pipeline for 3D RNA inverse design. 
+**gRNAde** is a geometric deep learning pipeline for 3D RNA inverse design, analogous to [ProteinMPNN](https://github.com/dauparas/ProteinMPNN) for protein design. 
 
 gRNAde generates an RNA sequence conditioned on one or more 3D RNA backbone conformations, i.e. both single- and multi-state **fixed-backbone sequence design**.
 RNA backbones are featurized as geometric graphs and processed via a multi-state GNN encoder which is equivariant to 3D roto-translation of coordinates as well as conformer order, followed by conformer order-invariant pooling and sequence design.
