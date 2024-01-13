@@ -19,9 +19,7 @@ from src.trainer import train, evaluate
 from src.data.dataset import RNADesignDataset, BatchSampler
 from src.models import (
     AutoregressiveMultiGNNv1, 
-    NonAutoregressiveMultiGNNv2,
-    NonAutoregressiveMultiGNNv1, 
-    NonAutoregressiveMultiGNNv0,
+    NonAutoregressiveMultiGNNv1,
 )
 from src.constants import DATA_PATH
 
