@@ -14,6 +14,7 @@ from biotite.structure.io import load_structure
 from biotite.structure import dot_bracket_from_structure
 
 from src.constants import (
+    PROJECT_PATH,
     X3DNA_PATH, 
     ETERNAFOLD_PATH, 
     DOTBRACKET_TO_NUM
@@ -127,7 +128,10 @@ def predict_sec_struct(
         assert fasta_file_path is None
         # Write sequence to temporary fasta file
         current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
-        fasta_file_path = os.path.join(wandb.run.dir, f"temp_{current_datetime}.fasta")
+        try:
+            fasta_file_path = os.path.join(wandb.run.dir, f"temp_{current_datetime}.fasta")
+        except AttributeError:
+            fasta_file_path = os.path.join(PROJECT_PATH, f"temp_{current_datetime}.fasta")
         SeqIO.write(
             SeqRecord(Seq(sequence), id="temp"),
             fasta_file_path, "fasta"
