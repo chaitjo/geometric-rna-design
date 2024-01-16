@@ -10,11 +10,6 @@ X3DNA_PATH = os.environ.get("X3DNA")
 
 ETERNAFOLD_PATH = os.environ.get("ETERNAFOLD")
 
-try:
-    RUN_PATH = wandb.run.dir
-except AttributeError:
-    RUN_PATH = './'  # default to current directory
-
 
 # Value to fill missing coordinate entries when reading PDB files
 FILL_VALUE = 1e-5

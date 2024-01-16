@@ -5,9 +5,6 @@ from tqdm import tqdm
 
 import torch
 import torch.utils.data as data
-import torch_geometric
-from torch_geometric.utils import coalesce, to_undirected
-import torch_cluster
 
 from src.data.data_utils import *
 from src.data.featurizer import *

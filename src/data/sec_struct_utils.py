@@ -1,6 +1,6 @@
 import os
 import subprocess
-import re
+from datetime import datetime
 import numpy as np
 import wandb
 from typing import Any, List, Literal, Optional
@@ -14,7 +14,6 @@ from biotite.structure.io import load_structure
 from biotite.structure import dot_bracket_from_structure
 
 from src.constants import (
-    RUN_PATH, 
     X3DNA_PATH, 
     ETERNAFOLD_PATH, 
     DOTBRACKET_TO_NUM
@@ -108,7 +107,6 @@ def predict_sec_struct(
         sequence: Optional[str] = None,
         fasta_file_path: Optional[str] = None,
         eternafold_path: str = os.path.join(ETERNAFOLD_PATH, "src/contrafold"),
-        run_path: str = RUN_PATH,
         n_samples: int = 1,
     ) -> str:
     """
@@ -123,13 +121,13 @@ def predict_sec_struct(
         sequence (str, optional): Sequence of RNA molecule. Defaults to None.
         fasta_file_path (str, optional): Path to fasta file. Defaults to None.
         eternafold_path (str, optional): Path to EternaFold. Defaults to ETERNAFOLD_PATH env variable.
-        run_path (str, optional): Path to run directory. Defaults to RUN_PATH env variable.
         n_samples (int, optional): Number of samples to take. Defaults to 1.
     """
     if sequence is not None:
         assert fasta_file_path is None
         # Write sequence to temporary fasta file
-        fasta_file_path = os.path.join(run_path, "temp.fasta")
+        current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+        fasta_file_path = os.path.join(wandb.run.dir, f"temp_{current_datetime}.fasta")
         SeqIO.write(
             SeqRecord(Seq(sequence), id="temp"),
             fasta_file_path, "fasta"
