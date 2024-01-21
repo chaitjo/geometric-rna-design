@@ -165,9 +165,9 @@ class RNAGraphFeaturizer(object):
 
         Args:
             rna (dict): Raw RNA data dictionary with keys:
-                - sequence (str): RNA sequence of length `num_atomsidues`.
+                - sequence (str): RNA sequence of length `num_residues`.
                 - coords_list (Tensor): Backbone coordinates with shape
-                    `(num_conformations, num_atomsidues, num_bb_atoms, 3)`.
+                    `(num_conformations, num_residues, num_bb_atoms, 3)`.
         """
         return self(rna)
 
@@ -240,22 +240,22 @@ def internal_coords(
 
     Inputs:
         X (Tensor): Backbone coordinates with shape
-            `(num_batch, num_atomsidues, num_atom_types, 3)`.
+            `(num_batch, num_residues, num_atom_types, 3)`.
         C (Tensor): Chain map tensor with shape
-            `(num_batch, num_atomsidues)`.
+            `(num_batch, num_residues)`.
 
     Outputs:
         dihedrals (Tensor): Backbone dihedral angles with shape
-            `(num_batch, num_atomsidues, 4)`
+            `(num_batch, num_residues, 4)`
         angles (Tensor): Backbone bond lengths with shape
-            `(num_batch, num_atomsidues, 4)`
+            `(num_batch, num_residues, 4)`
         lengths (Tensor): Backbone bond lengths with shape
-            `(num_batch, num_atomsidues, 4)`
+            `(num_batch, num_residues, 4)`
     """
     mask = (C > 0).float()
     X_chain = X[:, :, :2, :]
-    num_batch, num_atomsidues, _, _ = X_chain.shape
-    X_chain = X_chain.reshape(num_batch, 2 * num_atomsidues, 3)
+    num_batch, num_residues, _, _ = X_chain.shape
+    X_chain = X_chain.reshape(num_batch, 2 * num_residues, 3)
 
     # This function historically returns the angle complement
     _lengths = lambda Xi, Xj: lengths(Xi, Xj, distance_eps=distance_eps)
@@ -315,7 +315,7 @@ def internal_coords(
         A = F.pad(A, (1, 1))
         L = F.pad(L, (0, 1))
         N_D = F.pad(N_D, (0, 1))
-        D, A, L = [x.reshape(num_batch, num_atomsidues, 2) for x in [D, A, L]]
+        D, A, L = [x.reshape(num_batch, num_residues, 2) for x in [D, A, L]]
         _pack = lambda a, b: torch.cat([a, b.unsqueeze(-1)], dim=-1)
         L = _pack(L, N_L)
         A = _pack(A, N_A)
