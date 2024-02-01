@@ -12,7 +12,7 @@ RNA backbones are featurized as geometric graphs and processed via a multi-state
 📄 For more details on the methodology, see the accompanying paper: ['Multi-State RNA Design with Geometric Multi-Graph Neural Networks'](https://arxiv.org/abs/2305.14749)
 > Chaitanya K. Joshi, Arian R. Jamasb, Ramon Viñas, Charles Harris, Simon Mathis, and Pietro Liò. Multi-State RNA Design with Geometric Multi-Graph Neural Networks. *ICML Computational Biology Workshop, 2023.*
 >
->[PDF](https://arxiv.org/pdf/2305.14749.pdf) | [Tweet](https://twitter.com/chaitjo/status/1662118334412800001)
+>[PDF](https://arxiv.org/pdf/2305.14749.pdf) | [Tweet](https://twitter.com/chaitjo/status/1662118334412800001) | [Tutorial](/tutorial/tutorial.ipynb)
 
 
 
@@ -20,7 +20,6 @@ RNA backbones are featurized as geometric graphs and processed via a multi-state
 
 In order to get started, set up a python environment by following the installation instructions below. 
 We have tested gRNAde on Linux with Python 3.10.12 and CUDA 11.8 on an NVIDIA A100 80GB GPU, as well as on MacOS.
-
 ```sh
 # Clone gRNAde repository
 cd ~  # change this to your prefered download location
@@ -33,10 +32,13 @@ bash Miniforge3-Linux-x86_64.sh
 source ~/.bashrc
 # You may also use conda or virtualenv to create your environment
 
-# Create new environment
+# Create new environment and activate it
 mamba create -n rna python=3.10
 mamba activate rna
+```
 
+Next, install the dependencies within your new python environment.
+```sh
 # Install Pytorch (ensure appropriate CUDA version for your hardware)
 mamba install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
 
@@ -77,6 +79,9 @@ Once your python environment is set up, create your `.env` file with the appropr
 cd ~/rna-inverse-folding/
 touch .env
 ```
+
+You're now ready to use gRNAde via [the tutorial](/tutorial/tutorial.ipynb).
+In order to train your own models from scratch though, you still need to download and process raw RNA structures from RNAsolo ([instructions below](#downloading-data)).
 
 
 ## Directory Structure and Usage
