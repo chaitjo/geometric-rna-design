@@ -12,7 +12,7 @@ RNA backbones are featurized as geometric graphs and processed via a multi-state
 📄 For more details on the methodology, see the accompanying paper: ['Multi-State RNA Design with Geometric Multi-Graph Neural Networks'](https://arxiv.org/abs/2305.14749)
 > Chaitanya K. Joshi, Arian R. Jamasb, Ramon Viñas, Charles Harris, Simon Mathis, and Pietro Liò. Multi-State RNA Design with Geometric Multi-Graph Neural Networks. *ICML Computational Biology Workshop, 2023.*
 >
->[PDF](https://arxiv.org/pdf/2305.14749.pdf) | [Tweet](https://twitter.com/chaitjo/status/1662118334412800001) | [Tutorial](/tutorial/tutorial.ipynb)
+>[PDF](https://arxiv.org/pdf/2305.14749.pdf) | [Tweet](https://twitter.com/chaitjo/status/1662118334412800001) | [Slides](https://www.chaitjo.com/publication/joshi-2023-multi/gRNAde_slides_CASP_RNA_SIG.pdf) | [Tutorial](/tutorial/tutorial.ipynb)
 
 
 
@@ -151,7 +151,7 @@ cd ~/rna-inverse-folding/
 python scripts/process_data.py
 ```
 
-Each RNA will be processed into the following format (most of the metadata is optional for simply using gRNAde:
+Each RNA will be processed into the following format (most of the metadata is optional for simply using gRNAde):
 ```
 {
     'sequence'                   # RNA sequence as a string
