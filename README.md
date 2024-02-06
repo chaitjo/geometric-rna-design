@@ -9,6 +9,8 @@ RNA backbones are featurized as geometric graphs and processed via a multi-state
 
 ⚙️ Want to use gRNAde for your own RNA designs? Check out the tutorial notebook: [gRNAde 101](/tutorial/tutorial.ipynb)
 
+✏️ New to 3D RNA modelling? Here's a currated reading + watch list for beginners: [Resources](/tutorial/README.md)
+
 📄 For more details on the methodology, see the accompanying paper: ['Multi-State RNA Design with Geometric Multi-Graph Neural Networks'](https://arxiv.org/abs/2305.14749)
 > Chaitanya K. Joshi, Arian R. Jamasb, Ramon Viñas, Charles Harris, Simon Mathis, and Pietro Liò. Multi-State RNA Design with Geometric Multi-Graph Neural Networks. *ICML Computational Biology Workshop, 2023.*
 >
