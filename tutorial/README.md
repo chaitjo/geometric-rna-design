@@ -18,11 +18,14 @@ None the less, I do hope these resources will be useful for someone like myself 
 
 Before you begin, if you like games, do try and play the introductory parts of [Eterna](https://eternagame.org/). I can't think of a better way to start your journey in learning about RNA while having some fun!
 
+
+
 ## 🧬 RNA Biochemistry and Structural Biology
 
-- I can highly recommend working through the [RNA 3D Structure Course](http://tinyurl.com/RNA3DStructure) by Craig L. Zirbel and Neocles Leontis at Bowling Green State University. These self-contained notes are perfect for learning topic by topic at your own pace, and I find myself coming back to them frequently for reference. Here are two videos to go along with the notes:
+- I can highly recommend working through the [RNA 3D Structure Course](http://tinyurl.com/RNA3DStructure) by Craig L. Zirbel and Neocles Leontis at Bowling Green State University. These self-contained notes are perfect for learning topic-by-topic at your own pace, and I find myself coming back to them frequently for reference. Here are three videos to go along with the notes:
   - Anna Marie Pyle's excellent introduction to RNA structure for iBiology: [link](https://youtu.be/WCrlm18KQ48?si=mrpkgiuKg9SRu8VF)
   - A similar lecture as part of the MIT course by Barbara Imperiali: [link](https://www.youtube.com/watch?v=s1MoBTEcVYY&list=PL3xCprBkQzoneWGiypX1QOtq7lORKE-YN&index=5&t=10s&pp=gAQBiAQB)
+  - Eric Westhof's talk at CASP 15 about what makes RNA structure different from proteins: [link](https://www.youtube.com/watch?v=oVaABC2oTs0). You can feel how passionate he is about all the small but important details!
 
 - For understanding the broader biological context, I simultaneously listened through [MIT 7.016 Introductory Biology](https://www.youtube.com/playlist?list=PLUl4u3cNGP63LmSVIVzy584-ZbjbJ-Y63), which has really passionate lecturers and starts from the basics.
 
@@ -36,7 +39,7 @@ Before you begin, if you like games, do try and play the introductory parts of [
 
 ## 🎨 RNA Design (and Biomolecule Design, more broadly)
 
-- I would start by watching the latest talk I can find by David Baker ([example](https://www.youtube.com/watch?v=XI85Gh9YXS8)) and reading/watching talks about the 3 main tools for protein structure modelling and design: AlphaFold2, ProteinMPNN, and RFdiffusion.
+- Geometric Deep Learning for designing protein structure is very exciting at the moment! I would start by watching the latest talk I can find by David Baker ([example](https://www.youtube.com/watch?v=XI85Gh9YXS8)) and reading/watching talks about the 3 main tools for protein structure modelling and design: AlphaFold2, ProteinMPNN, and RFdiffusion.
     - [Nazim Bouatta's lectures on AlphaFold](https://cmsa.fas.harvard.edu/event/protein-folding/).
     - [ProteinMPNN by Justas Dauparas](https://www.youtube.com/watch?v=aVQQuoToTJA).
     - [RFdiffusion by Joe Watson and David Juergens](https://www.youtube.com/watch?v=wIHwHDt2NoI).
@@ -55,9 +58,9 @@ Before you begin, if you like games, do try and play the introductory parts of [
 
 ## 📦 Datasets
 
-- Introduction to the PDB file format: [link](https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html).
-- [RNASolo](https://rnasolo.cs.put.poznan.pl/), a repository of processed PDB-derived RNA 3D structures.
+- [RNASolo](https://rnasolo.cs.put.poznan.pl/), a repository of processed PDB-derived RNA 3D structures. Go ahead and look at some of the RNA structures in the viewer, see if you like how they twist and turn!
 - [RNA 3D Hub](http://rna.bgsu.edu/rna3dhub/), a repository of RNA structural annotations, motifs, and non-redundant (clustered) sets.
+- Introduction to the PDB file format: [link](https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html).
 
 
 
@@ -70,12 +73,6 @@ Before you begin, if you like games, do try and play the introductory parts of [
 - Some interesting surveys:
   - [RNA-based therapeutics: an overview and prospectus](https://www.nature.com/articles/s41419-022-05075-2).
   - [Tailor made: the art of therapeutic mRNA design](https://www.nature.com/articles/s41573-023-00827-x).
-
-
-
-## 🎥 More Videos
-
-- Eric Westhof's talk at CASP 15, about what makes RNA structure different from proteins: [link](https://www.youtube.com/watch?v=oVaABC2oTs0). You can feel how passionate he is about all the small but important details!
 
 - My playlist with most of the videos references in this document: [link](https://youtube.com/playlist?list=PL3xCprBkQzoneWGiypX1QOtq7lORKE-YN&si=US_-b6pBhAWe5ziP).
 
