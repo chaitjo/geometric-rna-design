@@ -297,6 +297,64 @@ class gRNAde(object):
             SeqIO.write(sequences, output_filepath, "fasta")
 
         return sequences, samples, perplexity, recovery, sc_score
+    
+    @torch.no_grad()
+    def perplexity(
+        self, 
+        seq: str,
+        raw_data: dict, 
+        featurized_data: Optional[torch_geometric.data.Data] = None, 
+        temperature: Optional[float] = DEFAULT_TEMPERATURE,
+        seed: Optional[int] = 0
+    ):
+        
+        # set random seed
+        set_seed(seed)
+
+        if raw_data['coords_list'][0].shape[1] == 3:
+            # Expected input: num_conf x num_res x num_bb_atoms x 3
+            # Backbone atoms: (P, C4', N1 or N9)
+            pass
+        elif raw_data['coords_list'][0].shape[1] == len(RNA_ATOMS):
+            coords_list = []
+            for coords in raw_data['coords_list']:
+                # Only keep backbone atom coordinates: num_res x num_bb_atoms x 3
+                coords = get_backbone_coords(coords, raw_data['sequence'])
+                # Do not add structures with missing coordinates for ALL residues
+                if not torch.all((coords == FILL_VALUE).sum(axis=(1,2)) > 0):
+                    coords_list.append(coords)
+
+            if len(coords_list) > 0:
+                # Add processed coords_list to self.data_list
+                raw_data['coords_list'] = coords_list
+        else:
+            raise ValueError(f"Invalid number of atoms per nucleotide in input data: {raw_data['coords_list'][0].shape[1]}")
+
+        if featurized_data is None:
+            # featurize raw data
+            featurized_data = self.featurizer.featurize(raw_data)
+
+        # transfer data to device
+        featurized_data = featurized_data.to(self.device)
+
+        # raw logits for perplexity calculation: seq_len x out_dim
+        logits = self.model.forward(featurized_data)
+
+        # convert sequence to tensor
+        _seq = torch.as_tensor(
+            [self.featurizer.letter_to_num[residue] for residue in seq], 
+            device=self.model.device, 
+            dtype=torch.long
+        )
+
+        # compute perplexity
+        perplexity = torch.exp(F.cross_entropy(
+            logits / temperature, 
+            _seq,
+            reduction="none"
+        ).mean()).cpu().numpy()
+        
+        return perplexity
 
 
 def set_seed(seed=0):
