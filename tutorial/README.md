@@ -62,5 +62,7 @@ Before you begin, if you like games, do try and play the introductory parts of [
 
 ## 🎥 More Videos
 
-- Eric Westof's talk at CASP 15, about what makes RNA structure different from proteins: [link](https://www.youtube.com/watch?v=oVaABC2oTs0) 
+- Eric Westof's talk at CASP 15, about what makes RNA structure different from proteins: [link](https://www.youtube.com/watch?v=oVaABC2oTs0).
+
+- My playlist with most of the videos references in this document: [link](https://youtube.com/playlist?list=PL3xCprBkQzoneWGiypX1QOtq7lORKE-YN&si=US_-b6pBhAWe5ziP).
 
