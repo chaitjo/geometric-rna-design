@@ -2,8 +2,8 @@
 
 **Why RNA? A personal account.**
 The Covid-19 pandemic was a very challenging period for me personally. 
-At the same time, I got very interested in reading about and understanding some of the science behind the disease (I had last formally studied biology in 10th grade and didn't enjoy all the fact memorisation).
-Around that time in 2022, I began my PhD at Cambridge and was interested in biomolecules.
+At the same time, I got interested in reading about and understanding some of the science behind the disease (I had last formally studied biology in 10th grade and didn't enjoy all the fact memorisation).
+In 2022, I began my PhD at Cambridge and was interested in biomolecules.
 I inherently knew that I wanted to motivated my work as a machine learner by biological problems that (hopelly) matter, but I didn't know much biology so I started by reading lots of popular science books. I felt that they were far more approachable, unlike textbooks.
 The pandemic was coming under control largely due to mRNA vaccines and I was feeling very inspired after reading about the scientific lives of [Jennifer Doudna](https://en.wikipedia.org/wiki/The_Code_Breaker) (Nobel Prize for CRISPR) and [Venki Ramakrishnan](https://www.google.co.uk/books/edition/Gene_Machine/sRVsDwAAQBAJ?hl=en) (Nobel Prize for Ribosomes), as well as several of [Siddhartha Mukherjee](https://en.wikipedia.org/wiki/Siddhartha_Mukherjee)'s books.
 
