@@ -26,9 +26,11 @@ Before you begin, if you like games, do try and play the introductory parts of [
 
 - For understanding the broader biological context, I simultaneously listened through [MIT 7.016 Introductory Biology](https://www.youtube.com/playlist?list=PLUl4u3cNGP63LmSVIVzy584-ZbjbJ-Y63), which has really passionate lecturers and starts from the basics.
 
+- [Thoughts on how to think (and talk) about RNA structure](https://www.pnas.org/doi/full/10.1073/pnas.2112677119). An approachable yet thorough paper introducing RNA structure. I keep finding myself coming back to refer to some details in this manuscript and highly recommend it.
+
 - Lastly, if you want to work through a textbook, I'm sure there are several nice ones out there. I've been referencing [Principles of Nucleic Acid Structure](https://link.springer.com/book/10.1007/978-1-4612-5190-3) from time to time because Pietro Liò very kindly gave me his copy.
 
-- I'm also enjoying the new [RNA Biology Coursera course](https://www.coursera.org/learn/rna-biology/) by Rhiju Das and the Das Lab at Stanford.
+- I'm also enjoying the new [RNA Biology Coursera course](https://www.coursera.org/learn/rna-biology/) by Rhiju Das and the Das Lab at Stanford. I would perhaps start here if I were starting from scratch.
 
 
 
@@ -40,9 +42,14 @@ Before you begin, if you like games, do try and play the introductory parts of [
     - [RFdiffusion by Joe Watson and David Juergens](https://www.youtube.com/watch?v=wIHwHDt2NoI).
     - A new survey which does a fantastic job overviewing these methods: [link](https://arxiv.org/abs/2310.09685).
  
-- Rhiju Das's excellent talk on [3D RNA Modelling and Design](https://youtu.be/2V09ne503V0?si=eqdiKTsk90oovSzB) poses a question that then captivated me: Can we bring to bear the success of these tools from the world of proteins to RNA?
+- Rhiju Das's excellent talk on [3D RNA Modelling and Design](https://youtu.be/2V09ne503V0?si=eqdiKTsk90oovSzB) poses a question that then captivated me: *Can we bring to bear the success of these tools from the world of proteins to RNA?*
+    - The accompanying perspective article: [link](https://www.nature.com/articles/s41592-021-01132-4).
+    - [RNAMake](https://www.nature.com/articles/s41565-019-0517-8) by Joseph Yesselman introduces a (non-ML) algorithm for aligning RNA motifs like lego blocks. It is particularly interesting to get a grasp of what sort of design scenarios one may be interested in.
+    - I also read through Rhiju's early works introducing the structure-based design paradigm for RNA; just sort his Google Scholar by date and scroll down. The paper on [Rosetta for RNA](https://www.nature.com/articles/nmeth.1433) felt like a very important one, in particular.
+ 
+- Ewan McRae's talk on RNA origami, another emerging non-ML paradigm for structural RNA design through assembling modular building blocks: [link](https://www.youtube.com/watch?v=nzrBUXfvwf4).
 
-- Phil Holliger's talk on evolutionary approaches to designing biomolecules: [link](https://youtu.be/a4v1IbK475s?si=ud1LXCb4-1E1OpkA). "Evolution is the most powerful algorithm currently known to man", and its perhaps worth pondering how structure-based or de-novo design can augment, automate, or complement parts of the already very powerful directed evolution approach to designing biomolecules.
+- For something a bit different but thought-provoking, Phil Holliger's talk on evolutionary approaches to designing biomolecules: [link](https://youtu.be/a4v1IbK475s?si=ud1LXCb4-1E1OpkA). "Evolution is the most powerful algorithm currently known to man", and its perhaps worth pondering how structure-based or de-novo design can augment, automate, or complement parts of the already very powerful directed evolution approach to designing biomolecules. Phil also briefly discusses [XNAs](https://en.wikipedia.org/wiki/Xeno_nucleic_acid) which are designed nucleic acids with rather profound implications for the origins of life itself; I do encourage you to go down that rabbit hole!
 
 
 
@@ -58,11 +65,17 @@ Before you begin, if you like games, do try and play the introductory parts of [
 
 - [Coarse-grained modeling of RNA 3D structure](https://www.sciencedirect.com/science/article/pii/S1046202316301050), an excellent overview of strategies for representing RNA structures as input for computational pipelines. Focussed on folding/structure prediction, but coarse-graining is a universal idea applicable across all machine learning tasks for RNA 3D structure.
 
+- [The roles of structural dynamics in the cellular functions of RNAs](https://www.nature.com/articles/s41580-019-0136-0) and [RNA conformational propensities determine cellular activity](https://www.nature.com/articles/s41586-023-06080-x), two important papers advancing a growing understanding of how RNAs (and other biomolecules for that matter) are not rigid 3D objects but rather a dancing ensemble composed of multiple structural or functional states. We were inspired to build multi-state Graph Neural Networks for gRNAde based on this line of work.
+
+- Some interesting surveys:
+  - [RNA-based therapeutics: an overview and prospectus](https://www.nature.com/articles/s41419-022-05075-2).
+  - [Tailor made: the art of therapeutic mRNA design](https://www.nature.com/articles/s41573-023-00827-x).
+
 
 
 ## 🎥 More Videos
 
-- Eric Westof's talk at CASP 15, about what makes RNA structure different from proteins: [link](https://www.youtube.com/watch?v=oVaABC2oTs0).
+- Eric Westhof's talk at CASP 15, about what makes RNA structure different from proteins: [link](https://www.youtube.com/watch?v=oVaABC2oTs0). You can feel how passionate he is about all the small but important details!
 
 - My playlist with most of the videos references in this document: [link](https://youtube.com/playlist?list=PL3xCprBkQzoneWGiypX1QOtq7lORKE-YN&si=US_-b6pBhAWe5ziP).
 
