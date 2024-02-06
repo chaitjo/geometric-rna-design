@@ -70,7 +70,7 @@ Before you begin, if you like games, do try and play the introductory parts of [
 
 ## 📝 More Papers
 
-- [Coarse-grained modeling of RNA 3D structure](https://www.sciencedirect.com/science/article/pii/S1046202316301050), an excellent overview of strategies for representing RNA structures as input for computational pipelines. This paper from Janusz Bujnicki's [Genesilico group](https://genesilico.pl/) (check out their website for lots of great resources) focussed on folding/structure prediction, but coarse-graining is a universal idea applicable across all machine learning tasks for RNA 3D structure.
+- [Coarse-grained modelling of RNA 3D structure](https://www.sciencedirect.com/science/article/pii/S1046202316301050), an excellent overview of strategies for representing RNA structures as input for computational pipelines. This paper from Janusz Bujnicki's [Genesilico group](https://genesilico.pl/) (check out their website for lots of great resources) focussed on folding/structure prediction, but coarse-graining is a universal idea applicable across all machine learning tasks for RNA 3D structure.
 
 
 - [The roles of structural dynamics in the cellular functions of RNAs](https://www.nature.com/articles/s41580-019-0136-0) and [RNA conformational propensities determine cellular activity](https://www.nature.com/articles/s41586-023-06080-x), two important papers advancing a growing understanding of how RNAs (and other biomolecules for that matter) are not rigid 3D objects but rather a dancing ensemble composed of multiple structural or functional states. We were inspired to build multi-state Graph Neural Networks for gRNAde based on this line of work.
