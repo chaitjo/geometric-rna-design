@@ -27,9 +27,9 @@ Before you begin, if you like games, do try and play the introductory parts of [
 ## 🧬 RNA Biochemistry and Structural Biology
 
 - I can highly recommend working through the [RNA 3D Structure Course](http://tinyurl.com/RNA3DStructure) by Craig L. Zirbel and Neocles Leontis at Bowling Green State University. These self-contained notes are perfect for learning topic-by-topic at your own pace, and I find myself coming back to them frequently for reference. Here are three videos to go along with the notes:
-  - Anna Marie Pyle's excellent introduction to RNA structure for iBiology: [link](https://youtu.be/WCrlm18KQ48?si=mrpkgiuKg9SRu8VF)
-  - A similar lecture as part of the MIT course by Barbara Imperiali: [link](https://www.youtube.com/watch?v=s1MoBTEcVYY&list=PL3xCprBkQzoneWGiypX1QOtq7lORKE-YN&index=5&t=10s&pp=gAQBiAQB)
-  - Eric Westhof's talk at CASP 15 about what makes RNA structure different from proteins: [link](https://www.youtube.com/watch?v=oVaABC2oTs0). You can feel how passionate he is about all the small but important details!
+  - Anna Marie Pyle's excellent [introduction to RNA structure](https://youtu.be/WCrlm18KQ48?si=mrpkgiuKg9SRu8VF) for iBiology.
+  - A similar [lecture as part of the MIT course](https://www.youtube.com/watch?v=s1MoBTEcVYY) by Barbara Imperiali.
+  - Eric Westhof's [talk at CASP 15](https://www.youtube.com/watch?v=oVaABC2oTs0) about what makes RNA structure different from proteins and how to compare RNA structures. You can feel how passionate he is about all the small but important details!
 
 - For understanding the broader biological context, I simultaneously listened through [MIT 7.016 Introductory Biology](https://www.youtube.com/playlist?list=PLUl4u3cNGP63LmSVIVzy584-ZbjbJ-Y63), which has really passionate lecturers and starts from the basics.
 
@@ -47,16 +47,16 @@ Before you begin, if you like games, do try and play the introductory parts of [
     - [Nazim Bouatta's lectures on AlphaFold](https://cmsa.fas.harvard.edu/event/protein-folding/).
     - [ProteinMPNN by Justas Dauparas](https://www.youtube.com/watch?v=aVQQuoToTJA).
     - [RFdiffusion by Joe Watson and David Juergens](https://www.youtube.com/watch?v=wIHwHDt2NoI).
-    - A new survey which does a fantastic job overviewing these methods: [link](https://arxiv.org/abs/2310.09685).
+    - [A new survey](https://arxiv.org/abs/2310.09685) which does a fantastic job overviewing these methods as well as protein language models (sequence-centric approach to design).
  
 - Rhiju Das's excellent talk on [3D RNA Modelling and Design](https://youtu.be/2V09ne503V0?si=eqdiKTsk90oovSzB) poses a question that then captivated me: *Can we bring to bear the success of these tools from the world of proteins to RNA?*
-    - The accompanying perspective article: [link](https://www.nature.com/articles/s41592-021-01132-4).
-    - [RNAMake](https://www.nature.com/articles/s41565-019-0517-8) by Joseph Yesselman introduces a (non-ML) algorithm for aligning RNA motifs like lego blocks. It is particularly interesting to get a grasp of what sort of design scenarios one may be interested in.
+    - The accompanying [perspective article](https://www.nature.com/articles/s41592-021-01132-4)).
+    - [RNAMake](https://www.nature.com/articles/s41565-019-0517-8) by Joseph Yesselman introduces a (non-ML) algorithm for aligning RNA motifs like lego blocks. It is particularly interesting to get a grasp of what sort of design scenarios one may be interested in. [Joseph's talk](https://www.youtube.com/watch?v=Lp_KozzV5Po) is also very nice.
     - I also read through Rhiju's early works introducing the structure-based design paradigm for RNA; just sort his Google Scholar by date and scroll down. The paper on [Rosetta for RNA](https://www.nature.com/articles/nmeth.1433) felt like a very important one, in particular.
  
-- Ewan McRae's talk on RNA origami, another emerging non-ML paradigm for structural RNA design through assembling modular building blocks: [link](https://www.youtube.com/watch?v=nzrBUXfvwf4).
+- Ewan McRae's [talk on RNA origami](https://www.youtube.com/watch?v=nzrBUXfvwf4), another emerging non-ML paradigm for structural RNA design through assembling modular building blocks.
 
-- For something a bit different but thought-provoking, Phil Holliger's talk on evolutionary approaches to designing biomolecules: [link](https://youtu.be/a4v1IbK475s?si=ud1LXCb4-1E1OpkA). "Evolution is the most powerful algorithm currently known to man", and its perhaps worth pondering how structure-based or de-novo design can augment, automate, or complement parts of the already very powerful directed evolution approach to designing biomolecules. Phil also briefly discusses [XNAs](https://en.wikipedia.org/wiki/Xeno_nucleic_acid) which are designed nucleic acids with rather profound implications for the origins of life itself; I do encourage you to go down that rabbit hole!
+- For something a bit different but thought-provoking, Phil Holliger's [talk on evolutionary approaches to designing biomolecules](https://youtu.be/a4v1IbK475s?si=ud1LXCb4-1E1OpkA). "Evolution is the most powerful algorithm currently known to man", and its perhaps worth pondering how structure-based or de-novo design can augment, automate, or complement parts of the already very powerful directed evolution approach to designing biomolecules. Phil also briefly discusses [XNAs](https://en.wikipedia.org/wiki/Xeno_nucleic_acid) which are designed nucleic acids with rather profound implications for the origins of life itself; I do encourage you to go down that rabbit hole!
 
 
 
@@ -64,7 +64,7 @@ Before you begin, if you like games, do try and play the introductory parts of [
 
 - [RNASolo](https://rnasolo.cs.put.poznan.pl/), a repository of processed PDB-derived RNA 3D structures. Go ahead and look at some of the RNA structures in the viewer, see if you like how they twist and turn!
 - [RNA 3D Hub](http://rna.bgsu.edu/rna3dhub/), a repository of RNA structural annotations, motifs, and non-redundant (clustered) sets.
-- Introduction to the PDB file format: [link](https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html).
+- [Introduction to the PDB file format](https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html).
 
 
 
@@ -81,5 +81,5 @@ Before you begin, if you like games, do try and play the introductory parts of [
   - [RNA-based therapeutics: an overview and prospectus](https://www.nature.com/articles/s41419-022-05075-2).
   - [Tailor made: the art of therapeutic mRNA design](https://www.nature.com/articles/s41573-023-00827-x).
 
-- My playlist with most of the videos references in this document: [link](https://youtube.com/playlist?list=PL3xCprBkQzoneWGiypX1QOtq7lORKE-YN&si=US_-b6pBhAWe5ziP).
+- [My playlist](https://youtube.com/playlist?list=PL3xCprBkQzoneWGiypX1QOtq7lORKE-YN&si=US_-b6pBhAWe5ziP) with most of the videos references in this document.
 
