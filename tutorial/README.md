@@ -50,7 +50,7 @@ Before you begin, if you like games, do try and play the introductory parts of [
     - [A new survey](https://arxiv.org/abs/2310.09685) which does a fantastic job overviewing these methods as well as protein language models (sequence-centric approach to design).
  
 - Rhiju Das's excellent talk on [3D RNA Modelling and Design](https://youtu.be/2V09ne503V0?si=eqdiKTsk90oovSzB) poses a question that then captivated me: *Can we bring to bear the success of these tools from the world of proteins to RNA?*
-    - The accompanying [perspective article](https://www.nature.com/articles/s41592-021-01132-4)).
+    - The accompanying [perspective article](https://www.nature.com/articles/s41592-021-01132-4).
     - [RNAMake](https://www.nature.com/articles/s41565-019-0517-8) by Joseph Yesselman introduces a (non-ML) algorithm for aligning RNA motifs like lego blocks. It is particularly interesting to get a grasp of what sort of design scenarios one may be interested in. [Joseph's talk](https://www.youtube.com/watch?v=Lp_KozzV5Po) is also very nice.
     - I also read through Rhiju's early works introducing the structure-based design paradigm for RNA; just sort his Google Scholar by date and scroll down. The paper on [Rosetta for RNA](https://www.nature.com/articles/nmeth.1433) felt like a very important one, in particular.
  
