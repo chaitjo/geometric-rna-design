@@ -1,7 +1,23 @@
 # Getting started with 3D RNA modelling as a machine learner
 
+**Why RNA? A personal account.**
+The Covid-19 pandemic was a very challenging period for me personally. 
+At the same time, I got very interested in reading about and understanding some of the science behind the disease.
+I had last formally studied biology in 10th grade and didn't enjoy all the memorisation of facts.
+Around that time in 2022, I began my PhD at Cambridge and was interested in biomolecules.
+I inherently knew that I wanted to motivated my work as a machine learner by biological problems that (hopelly) matter, but I didn't know much biology so I started by reading lots of popular science books. I felt that they were far more approachable, unlike textbooks.
+The pandemic was coming under control largely due to mRNA vaccines and I was feeling very inspired after reading about the scientific lives of [Jennifer Doudna](https://en.wikipedia.org/wiki/The_Code_Breaker) (Nobel Prize for CRISPR) and [Venki Ramakrishnan](https://www.google.co.uk/books/edition/Gene_Machine/sRVsDwAAQBAJ?hl=en) (Nobel Prize for Ribosomes), as well as several of [Siddhartha Mukherjee](https://en.wikipedia.org/wiki/Siddhartha_Mukherjee)'s books.
 
-But before you begin, if you like games, do try and play the introductory parts of [Eterna](https://eternagame.org/). I can't think of a better way to start learning about RNA while having some fun!
+One uniting theme across everything I was reading and what was happening around me was the central role played by RNA molecules.
+Everybody (including myself) in deep learning was very excited about modelling proteins after AlphaFold happened, but a chance conversation with [Roger Foo](https://www.foo-lab.sg/) suggested that RNA might be something that's currently more exciting and novel to biologists. 
+I can't explain precisely why, but I found something very interesting about RNA's biochemistry, the intricate structures it folds into, and the stories of the research as well as the scientists behind them. I also found the community to be very welcoming and friendly to newcomers :)
+
+**Disclaimer.**
+This document contains a currated list of resources I've been using in order to understand RNA biology and feel motivated to work on RNA design.
+I'm not an expert at all, so it is very likely that I've missed something important.
+None the less, I do hope these resources will be useful for someone like myself a couple years ago!
+
+Before you begin, if you like games, do try and play the introductory parts of [Eterna](https://eternagame.org/). I can't think of a better way to start your journey in learning about RNA while having some fun!
 
 ## 🧬 RNA Biochemistry and Structural Biology
 
