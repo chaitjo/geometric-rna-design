@@ -123,7 +123,7 @@ class gRNAde(object):
 
     def design_from_pdb_file(
             self, 
-            pdb_filepath,
+            pdb_filepath: str,
             output_filepath: Optional[str] = None, 
             n_samples: Optional[int] = DEFAULT_N_SAMPLES,
             temperature: Optional[float] = DEFAULT_TEMPERATURE,
@@ -152,7 +152,7 @@ class gRNAde(object):
 
     def design_from_directory(
             self,
-            directory_filepath,
+            directory_filepath: str,
             output_filepath: Optional[str] = None, 
             n_samples: Optional[int] = DEFAULT_N_SAMPLES,
             temperature: Optional[float] = DEFAULT_TEMPERATURE,
@@ -298,6 +298,57 @@ class gRNAde(object):
 
         return sequences, samples, perplexity, recovery, sc_score
     
+    def perplexity_from_pdb_file(
+            self, 
+            seq: str,
+            pdb_filepath: str,
+            temperature: Optional[float] = DEFAULT_TEMPERATURE,
+            seed: Optional[int] = 0
+        ):
+        """
+        Computer perplexity of an RNA sequences for a backbone from a PDB file,
+        i.e. P (sequence | backbone structure)
+
+        Args:
+            seq (str): RNA sequence
+            pdb_filepath (str): filepath to PDB file
+            temperature (float): temperature for sampling
+            seed (int): random seed for reproducibility
+        
+        Returns:
+            perplexity (float): perplexity for RNA sequence
+        """
+        featurized_data, raw_data = self.featurizer.featurize_from_pdb_file(pdb_filepath)
+        return self.perplexity(seq, raw_data, featurized_data, temperature, seed)
+    
+    def perplexity_from_directory(
+            self,
+            seq: str,
+            directory_filepath: str,
+            temperature: Optional[float] = DEFAULT_TEMPERATURE,
+            seed: Optional[int] = 0
+        ):
+        """
+        Computer perplexity of an RNA sequences for a set of backbones 
+        from a directory of PDB files,
+        i.e. P (sequence | backbone conformational ensemble)
+
+        Args:
+            seq (str): RNA sequence
+            directory_filepath (str): filepath to directory of PDB files
+            temperature (float): temperature for sampling
+            seed (int): random seed for reproducibility
+
+        Returns:
+            perplexity (float): perplexity for RNA sequence
+        """
+        pdb_filelist = []
+        for pdb_filepath in os.listdir(directory_filepath):
+            if pdb_filepath.endswith(".pdb"):
+                pdb_filelist.append(os.path.join(directory_filepath, pdb_filepath))
+        featurized_data, raw_data = self.featurizer.featurize_from_pdb_filelist(pdb_filelist)
+        return self.perplexity(seq, raw_data, featurized_data, temperature, seed)
+    
     @torch.no_grad()
     def perplexity(
         self, 
@@ -307,7 +358,25 @@ class gRNAde(object):
         temperature: Optional[float] = DEFAULT_TEMPERATURE,
         seed: Optional[int] = 0
     ):
+        """
+        Computer perplexity of an RNA sequence conditioned on 
+        one or more backbones from raw data.
+
+        Args:
+            seq (str): RNA sequence
+            raw_data (dict): Raw RNA data dictionary with keys:
+                - sequence (str): RNA sequence of length `num_res`.
+                - coords_list (Tensor): Backbone coordinates with shape
+                    `(num_conf, num_res, num_bb_atoms, 3)`.
+                - sec_struct_list (List[str]): Secondary structure for each
+                    conformer in dotbracket notation.
+            featurized_data (torch_geometric.data.Data): featurized RNA data
+            temperature (float): temperature for sampling
+            seed (int): random seed for reproducibility
         
+        Returns:
+            perplexity (float): perplexity for RNA sequence
+        """  
         # set random seed
         set_seed(seed)
 
@@ -337,15 +406,16 @@ class gRNAde(object):
         # transfer data to device
         featurized_data = featurized_data.to(self.device)
 
-        # raw logits for perplexity calculation: seq_len x out_dim
-        logits = self.model.forward(featurized_data)
-
         # convert sequence to tensor
         _seq = torch.as_tensor(
             [self.featurizer.letter_to_num[residue] for residue in seq], 
-            device=self.model.device, 
+            device=self.device, 
             dtype=torch.long
         )
+        featurized_data.seq = _seq
+
+        # raw logits for perplexity calculation: seq_len x out_dim
+        logits = self.model.forward(featurized_data)
 
         # compute perplexity
         perplexity = torch.exp(F.cross_entropy(
