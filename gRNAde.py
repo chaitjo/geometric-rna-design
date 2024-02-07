@@ -306,7 +306,7 @@ class gRNAde(object):
             seed: Optional[int] = 0
         ):
         """
-        Computer perplexity of an RNA sequences for a backbone from a PDB file,
+        Compute perplexity of an RNA sequences for a backbone from a PDB file,
         i.e. P (sequence | backbone structure)
 
         Args:
@@ -329,7 +329,7 @@ class gRNAde(object):
             seed: Optional[int] = 0
         ):
         """
-        Computer perplexity of an RNA sequences for a set of backbones 
+        Compute perplexity of an RNA sequences for a set of backbones 
         from a directory of PDB files,
         i.e. P (sequence | backbone conformational ensemble)
 
@@ -359,7 +359,7 @@ class gRNAde(object):
         seed: Optional[int] = 0
     ):
         """
-        Computer perplexity of an RNA sequence conditioned on 
+        Compute perplexity of an RNA sequence conditioned on 
         one or more backbones from raw data.
 
         Args:
