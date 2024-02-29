@@ -1,22 +1,22 @@
-# 💣 gRNAde: Geometric RNA Design
+# 💣 gRNAde: Geometric Deep Learning for 3D RNA Inverse Design
 
-**gRNAde** is a geometric deep learning pipeline for 3D RNA inverse design, analogous to [ProteinMPNN](https://github.com/dauparas/ProteinMPNN) for protein design. 
+**gRNAde** is a **g**eometric deep learning pipeline for 3D **RNA** inverse **de**sign, analogous to [ProteinMPNN](https://github.com/dauparas/ProteinMPNN) for protein design. 
 
-gRNAde generates an RNA sequence conditioned on one or more 3D RNA backbone conformations, i.e. both single- and multi-state **fixed-backbone sequence design**.
-RNA backbones are featurized as geometric graphs and processed via a multi-state GNN encoder which is equivariant to 3D roto-translation of coordinates as well as conformer order, followed by conformer order-invariant pooling and sequence design.
+🧬 Tutorial notebook to get started: [gRNAde 101](/tutorial/tutorial.ipynb)
 
-![](/tutorial/fig/grnade_pipeline.png)
+⚙️ Using gRNAde for custom RNA design scenarios: [Design notebook](/notebooks/design.ipynb)
 
-⚙️ Want to use gRNAde for your own RNA designs? Check out the tutorial notebook: [gRNAde 101](/tutorial/tutorial.ipynb)
-
-✏️ New to 3D RNA modelling? Here's a currated reading + watch list for beginners: [Resources](/tutorial/README.md)
+✍️ New to 3D RNA modelling? Here's a currated reading + watch list for beginners: [Resources](/tutorial/README.md)
 
 📄 For more details on the methodology, see the accompanying paper: ['Multi-State RNA Design with Geometric Multi-Graph Neural Networks'](https://arxiv.org/abs/2305.14749)
 > Chaitanya K. Joshi, Arian R. Jamasb, Ramon Viñas, Charles Harris, Simon Mathis, and Pietro Liò. Multi-State RNA Design with Geometric Multi-Graph Neural Networks. *ICML Computational Biology Workshop, 2023.*
 >
->[PDF](https://arxiv.org/pdf/2305.14749.pdf) | [Tweet](https://twitter.com/chaitjo/status/1662118334412800001) | [Slides](https://www.chaitjo.com/publication/joshi-2023-multi/gRNAde_slides_CASP_RNA_SIG.pdf) | [Tutorial](/tutorial/tutorial.ipynb)
+>[PDF](https://arxiv.org/abs/2305.14749.abs) | [Tweet](https://twitter.com/chaitjo/status/1662118334412800001) | [Slides](https://www.chaitjo.com/publication/joshi-2023-grnade/gRNAde_slides_CASP_RNA_SIG.pdf)
 
+![](/tutorial/fig/grnade_pipeline.png)
 
+gRNAde generates an RNA sequence conditioned on one or more 3D RNA backbone conformations, i.e. both single- and multi-state **fixed-backbone sequence design**.
+RNA backbones are featurized as geometric graphs and processed via a multi-state GNN encoder which is equivariant to 3D roto-translation of coordinates as well as conformer order, followed by conformer order-invariant pooling and sequence design.
 
 ## Installation
 
@@ -173,7 +173,7 @@ Each RNA will be processed into the following format (most of the metadata is op
 ## Citation
 
 ```
-@inproceedings{joshi2023multi,
+@inproceedings{joshi2023grnade,
   title={Multi-State RNA Design with Geometric Multi-Graph Neural Networks},
   author={Joshi, Chaitanya K. and Jamasb, Arian R. and Viñas, Ramon and Harris, Charles and Mathis, Simon and Liò, Pietro},
   booktitle={ICML 2023 Workshop on Computation Biology},
