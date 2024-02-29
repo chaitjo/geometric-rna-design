@@ -1,6 +1,9 @@
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+import draw_rna.draw as d
+from draw_rna.draw_utils import seq2col
+
 from lovely_numpy import lo
 import lovely_tensors as lt
 lt.monkey_patch()
@@ -20,12 +23,46 @@ def print_rna_data(data):
             print(f"{key}:")
             for sec_struct in value:
                 print(f"\t{sec_struct}")
+        elif key == "eterna_sec_struct_list":
+            print(f"{key}:")
+            for sec_struct in value:
+                print(f"\t{sec_struct}")
         elif key == "rmsds_list":
             print(f"{key}:")
             for pair, rmsd in value.items():
                 print(f"\t{pair}, {rmsd}")
         else:
             print(f"{key}:\n\t{value}")
+
+
+def draw_struct(seq, secstruct, c=None, line=False, large_mode=False, cmap='viridis', rotation=0, vmin=None, vmax=None, alpha=None, ax=None):
+    '''
+    Draw sequence with secondary structure.
+    
+    Inputs:
+    c (string or array-like).  If string, characters must correspond to colors.
+    If array-like obj, used as mapping for colormap (provided in cmap), or a string.
+    line (bool): draw secstruct as line.
+    large_mode: draw outer loop as straight line.
+    rotation: rotate molecule (in degrees).
+
+    Source: https://github.com/DasLab/draw_rna
+    '''
+    if c is not None:
+        assert len(c) == len(seq)
+        if isinstance(c[0], float):
+            d.draw_rna(seq, secstruct, c, line=line, ext_color_file=True, cmap_name = cmap, vmin=vmin, vmax=vmax,
+             rotation=rotation, large_mode = large_mode, alpha=alpha, ax=ax)
+        else:
+            d.draw_rna(seq, secstruct, c,  line=line, cmap_name=cmap, large_mode=large_mode, vmin=vmin, vmax=vmax,
+             rotation=rotation, alpha=alpha, ax=ax)
+
+    else:
+        d.draw_rna(seq, secstruct, seq2col(seq), line=line, cmap_name = cmap, vmin=vmin, vmax=vmax,
+         large_mode = large_mode, rotation=rotation, alpha=alpha, ax=ax)
+
+    if ax is None:
+        plt.show()
 
 
 def plot_multiple_3d_point_clouds(point_clouds):
