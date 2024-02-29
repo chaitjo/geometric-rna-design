@@ -15,7 +15,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from src.trainer import evaluate, self_consistency_score
+from src.trainer import self_consistency_score
 from src.data.featurizer import RNAGraphFeaturizer
 from src.models import AutoregressiveMultiGNNv1
 from src.data.data_utils import get_backbone_coords
@@ -27,16 +27,30 @@ from src.constants import (
 )
 
 
-# Model checkpoint paths corresponding to maximum no. of conformers
-CONFORMERS_TO_CHECKPOINT_PATH = {
-    1: os.path.join(PROJECT_PATH, "checkpoints/gRNAde_ARv1_1state.h5"),
-    2: os.path.join(PROJECT_PATH, "checkpoints/gRNAde_ARv1_2state.h5"),
-    3: os.path.join(PROJECT_PATH, "checkpoints/gRNAde_ARv1_3state.h5"),
-    5: os.path.join(PROJECT_PATH, "checkpoints/gRNAde_ARv1_5state.h5"),
+# Model checkpoint paths corresponding to data split and maximum no. of conformers
+CHECKPOINT_PATH = {
+    'all': {
+        1: os.path.join(PROJECT_PATH, "checkpoints/gRNAde_ARv1_1state_all.h5"),
+        2: os.path.join(PROJECT_PATH, "checkpoints/gRNAde_ARv1_2state_all.h5"),
+        3: os.path.join(PROJECT_PATH, "checkpoints/gRNAde_ARv1_3state_all.h5"),
+        5: os.path.join(PROJECT_PATH, "checkpoints/gRNAde_ARv1_5state_all.h5"),
+    },
+    'das': {
+        1: os.path.join(PROJECT_PATH, "checkpoints/gRNAde_ARv1_1state_das.h5"),
+        2: os.path.join(PROJECT_PATH, "checkpoints/gRNAde_ARv1_2state_das.h5"),
+        3: os.path.join(PROJECT_PATH, "checkpoints/gRNAde_ARv1_3state_das.h5"),
+        5: os.path.join(PROJECT_PATH, "checkpoints/gRNAde_ARv1_5state_das.h5"),
+    },
+    'multi': {
+        1: os.path.join(PROJECT_PATH, "checkpoints/gRNAde_ARv1_1state_multi.h5"),
+        2: os.path.join(PROJECT_PATH, "checkpoints/gRNAde_ARv1_2state_multi.h5"),
+        3: os.path.join(PROJECT_PATH, "checkpoints/gRNAde_ARv1_3state_multi.h5"),
+        5: os.path.join(PROJECT_PATH, "checkpoints/gRNAde_ARv1_5state_multi.h5"),
+    }
 }
 
 # Default model hyperparameters (do not change)
-VERSION = 0.2
+VERSION = 0.3
 RADIUS = 0.0
 TOP_K = 32
 NUM_RBF = 32
@@ -62,12 +76,14 @@ class gRNAde(object):
     backbone re-design of RNA structures.
 
     Args:
+        split (str): data split used to train the model (all/das/multi)
         max_num_conformers (int): maximum number of conformers for an input RNA backbone
         gpu_id (int): GPU ID to use for inference (defaults to cpu if no GPU is available)
     """
 
     def __init__(
             self,
+            split: Optional[str] = "all",
             max_num_conformers: Optional[int] = 1,
             gpu_id: Optional[int] = 0,
         ):
@@ -77,9 +93,10 @@ class gRNAde(object):
         print(f"Instantiating gRNAde v{self.version}")
 
         # Set maximum number of conformers
-        if max_num_conformers > max(list(CONFORMERS_TO_CHECKPOINT_PATH.keys())):
-            max_num_conformers = max(list(CONFORMERS_TO_CHECKPOINT_PATH.keys()))
+        if max_num_conformers > max(list(CHECKPOINT_PATH[split].keys())):
+            max_num_conformers = max(list(CHECKPOINT_PATH[split].keys()))
             print(f"    Invalid max_num_conformers. Setting to maximum value: {max_num_conformers}")
+        self.split = split
         self.max_num_conformers = max_num_conformers
         
         # Set device (GPU/CPU)
@@ -111,7 +128,7 @@ class gRNAde(object):
             out_dim = OUT_DIM
         )
         # Load model checkpoint
-        self.model_path = CONFORMERS_TO_CHECKPOINT_PATH[max_num_conformers]
+        self.model_path = CHECKPOINT_PATH[split][max_num_conformers]
         print(f"    Loading model checkpoint: {self.model_path}")
         self.model.load_state_dict(torch.load(self.model_path, map_location=torch.device('cpu')))
 
@@ -127,6 +144,7 @@ class gRNAde(object):
             output_filepath: Optional[str] = None, 
             n_samples: Optional[int] = DEFAULT_N_SAMPLES,
             temperature: Optional[float] = DEFAULT_TEMPERATURE,
+            partial_seq: Optional[str] = None,
             seed: Optional[int] = 0
         ):
         """
@@ -138,6 +156,10 @@ class gRNAde(object):
             output_filepath (str): filepath to write designed sequences to
             n_samples (int): number of samples to generate
             temperature (float): temperature for sampling
+            partial_seq (str): partial sequence used to fix nucleotides in 
+                designed sequences, provided as a string of nucleotides 
+                and underscores (e.g. "AUG___") where letters are fixed 
+                and underscores represent designable positions.
             seed (int): random seed for reproducibility
         
         Returns:
@@ -148,7 +170,7 @@ class gRNAde(object):
             sc_score (Tensor): global self consistency score per sample with shape `(n_samples, 1)`
         """
         featurized_data, raw_data = self.featurizer.featurize_from_pdb_file(pdb_filepath)
-        return self.design(raw_data, featurized_data, output_filepath, n_samples, temperature, seed)
+        return self.design(raw_data, featurized_data, output_filepath, n_samples, temperature, partial_seq, seed)
 
     def design_from_directory(
             self,
@@ -156,6 +178,7 @@ class gRNAde(object):
             output_filepath: Optional[str] = None, 
             n_samples: Optional[int] = DEFAULT_N_SAMPLES,
             temperature: Optional[float] = DEFAULT_TEMPERATURE,
+            partial_seq: Optional[str] = None,
             seed: Optional[int] = 0
         ):
         """
@@ -168,6 +191,10 @@ class gRNAde(object):
             output_filepath (str): filepath to write designed sequences to
             n_samples (int): number of samples to generate
             temperature (float): temperature for sampling
+            partial_seq (str): partial sequence used to fix nucleotides in 
+                designed sequences, provided as a string of nucleotides 
+                and underscores (e.g. "AUG___") where letters are fixed 
+                and underscores represent designable positions.
             seed (int): random seed for reproducibility
         
         Returns:
@@ -182,7 +209,7 @@ class gRNAde(object):
             if pdb_filepath.endswith(".pdb"):
                 pdb_filelist.append(os.path.join(directory_filepath, pdb_filepath))
         featurized_data, raw_data = self.featurizer.featurize_from_pdb_filelist(pdb_filelist)
-        return self.design(raw_data, featurized_data, output_filepath, n_samples, temperature, seed)
+        return self.design(raw_data, featurized_data, output_filepath, n_samples, temperature, partial_seq, seed)
 
     @torch.no_grad()
     def design(
@@ -192,6 +219,7 @@ class gRNAde(object):
         output_filepath: Optional[str] = None, 
         n_samples: Optional[int] = DEFAULT_N_SAMPLES,
         temperature: Optional[float] = DEFAULT_TEMPERATURE,
+        partial_seq: Optional[str] = None,
         seed: Optional[int] = 0
     ):
         """
@@ -208,6 +236,10 @@ class gRNAde(object):
             output_filepath (str): filepath to write designed sequences to
             n_samples (int): number of samples to generate
             temperature (float): temperature for sampling
+            partial_seq (str): partial sequence used to fix nucleotides in 
+                designed sequences, provided as a string of nucleotides 
+                and underscores (e.g. "AUG___") where letters are fixed 
+                and underscores represent designable positions.
             seed (int): random seed for reproducibility
         
         Returns:
@@ -245,10 +277,28 @@ class gRNAde(object):
 
         # transfer data to device
         featurized_data = featurized_data.to(self.device)
+
+        # create logit bias matrix if partial sequence is provided
+        if partial_seq is not None:
+            # convert partial sequence to tensor
+            _partial_seq = []
+            for residue in partial_seq:
+                if residue in self.featurizer.letter_to_num.keys():
+                    # fixed nucleotide
+                    _partial_seq.append(self.featurizer.letter_to_num[residue])
+                else:
+                    # designable position
+                    _partial_seq.append(len(self.featurizer.letter_to_num.keys()))
+            _partial_seq = torch.as_tensor(_partial_seq, device=self.device, dtype=torch.long)
+            # convert to one-hot and create bias matrix used during sampling
+            logit_bias = F.one_hot(_partial_seq, num_classes=self.model.out_dim+1).float()
+            logit_bias = logit_bias[:, :-1] * 100.0
+        else:
+            logit_bias = None
         
         # sample n_samples from model for single data point: n_samples x seq_len
         samples, logits = self.model.sample(
-            featurized_data, n_samples, temperature, return_logits=True)
+            featurized_data, n_samples, temperature, logit_bias, return_logits=True)
 
         # perplexity per sample: n_samples x 1
         n_nodes = logits.shape[1]
@@ -302,7 +352,7 @@ class gRNAde(object):
             self, 
             seq: str,
             pdb_filepath: str,
-            temperature: Optional[float] = DEFAULT_TEMPERATURE,
+            temperature: Optional[float] = 1.0,
             seed: Optional[int] = 0
         ):
         """
@@ -325,7 +375,7 @@ class gRNAde(object):
             self,
             seq: str,
             directory_filepath: str,
-            temperature: Optional[float] = DEFAULT_TEMPERATURE,
+            temperature: Optional[float] = 1.0,
             seed: Optional[int] = 0
         ):
         """
@@ -355,7 +405,7 @@ class gRNAde(object):
         seq: str,
         raw_data: dict, 
         featurized_data: Optional[torch_geometric.data.Data] = None, 
-        temperature: Optional[float] = DEFAULT_TEMPERATURE,
+        temperature: Optional[float] = 1.0,
         seed: Optional[int] = 0
     ):
         """
@@ -466,6 +516,13 @@ if __name__ == "__main__":
         help="Filepath to fasta file to save designed sequences"
     )
     parser.add_argument(
+        '--split', 
+        dest='split', 
+        default="all", 
+        type=str,
+        help="Data split used to train the model (all/das/multi)"
+    )
+    parser.add_argument(
         '--max_num_conformers', 
         dest='max_num_conformers', 
         default=1, 
@@ -485,6 +542,13 @@ if __name__ == "__main__":
         default=0.2, 
         type=float,
         help="Temperature for sampling"
+    )
+    parser.add_argument(
+        '--partial_seq',
+        dest='partial_seq',
+        default=None,
+        type=str,
+        help="Partial sequence used to fix nucleotides in designed sequences"
     )
     parser.add_argument(
         '--seed', 
@@ -507,6 +571,7 @@ if __name__ == "__main__":
         raise ValueError("Please specify either pdb_filepath or directory_filepath")
 
     g = gRNAde(
+        split=args.split,
         max_num_conformers=args.max_num_conformers, 
         gpu_id=args.gpu_id
     )
@@ -517,6 +582,7 @@ if __name__ == "__main__":
             output_filepath=args.output_filepath,
             n_samples=args.n_samples,
             temperature=args.temperature,
+            partial_seq=args.partial_seq,
             seed=args.seed
         )
     elif args.directory_filepath is not None:
@@ -525,6 +591,7 @@ if __name__ == "__main__":
             output_filepath=args.output_filepath,
             n_samples=args.n_samples,
             temperature=args.temperature,
+            partial_seq=args.partial_seq,
             seed=args.seed
         )
 

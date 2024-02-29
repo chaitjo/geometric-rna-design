@@ -1,4 +1,5 @@
 import os
+import copy
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -293,6 +294,7 @@ def self_consistency_score(
         mask_coords,
         n_samples_ss = 1,
         num_to_letter = NUM_TO_LETTER,
+        return_sec_structs = False
     ):
     """
     Compute self consistency score for an RNA, given its true secondary structure(s)
@@ -304,6 +306,7 @@ def self_consistency_score(
         mask_coords: mask for missing sequence coordinates to be ignored during evaluation
         n_samples_ss: number of predicted secondary structures per designed sample
         num_to_letter: lookup table mapping integers to nucleotides
+        return_sec_structs: whether to return the predicted secondary structures
     
     Workflow:
         
@@ -335,11 +338,14 @@ def self_consistency_score(
     ).unsqueeze(1).repeat(1, n_samples_ss, 1, 1).reshape(-1, sequence_length, sequence_length)
 
     mcc_scores = []
+    pred_sec_structs = []
     for _sample in samples:
         # convert sample to string
         pred_seq = ''.join([num_to_letter[num] for num in _sample])
         # predict secondary structure(s) for each sample
         pred_sec_struct_list = predict_sec_struct(pred_seq, n_samples=n_samples_ss)
+        if return_sec_structs:
+            pred_sec_structs.append(copy.copy(pred_sec_struct_list))
         # map all entries from dotbracket to numerical representation
         pred_sec_struct_list = np.array([dotbracket_to_adjacency(ss) for ss in pred_sec_struct_list])
         # reshape to (n_samples_ss * n_true_ss, seq_len, seq_len)
@@ -355,7 +361,33 @@ def self_consistency_score(
             ).float().mean()
         )
 
-    return np.array(mcc_scores)
+    if return_sec_structs:
+        return np.array(mcc_scores), pred_sec_structs
+    else:
+        return np.array(mcc_scores)
+
+
+def self_consistency_score_ribonanza(
+        samples, 
+        true_chem_mod, 
+        ribonanza_net,
+        num_to_letter = NUM_TO_LETTER,
+        return_chem_mods = False
+    ):
+    """
+    Compute self consistency score for an RNA, given its predicted chemical modifiers using
+    RibonanzaNet and a list of designed sequences. 
+    RibonanzaNet is used to 'forward probe' the designs by predicting their 
+    chemical modifiers (2A3 and DMS) and computing MAE to the groundtruth sequence.
+    
+    Requires: https://github.com/Shujun-He/RibonanzaNet/
+    """
+    _samples = np.array([[num_to_letter[num] for num in seq] for seq in samples])
+    pred_chem_mod = ribonanza_net.predict(_samples)
+    if return_chem_mods:
+        return (np.abs(pred_chem_mod - true_chem_mod)).mean(2).mean(1), pred_chem_mod
+    else:
+        return (np.abs(pred_chem_mod - true_chem_mod)).mean(2).mean(1)
 
 
 def print_and_log(

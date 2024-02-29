@@ -4,7 +4,8 @@ If you're already an expert in RNA structure modelling and want to get started w
 
 If you're a computer scientist or machine learner without much background in biology but keen to enter the RNA world, read on...
 
-**Why RNA? A personal account.**
+<details>
+<summary><b>Why RNA? A personal account.</b></summary>
 The Covid-19 pandemic was a very challenging period for me personally. 
 At the same time, I got interested in reading about and understanding some of the science behind the disease (I had last formally studied biology in 10th grade and didn't enjoy all the fact memorisation).
 In 2022, I began my PhD at Cambridge and was interested in biomolecules.
@@ -14,6 +15,7 @@ The pandemic was coming under control largely due to mRNA vaccines and I was fee
 One uniting theme across everything I was reading and what was happening around me was the central role played by RNA molecules.
 Everybody (including myself) in deep learning was very excited about modelling proteins after AlphaFold happened, but a chance conversation with [Roger Foo](https://www.foo-lab.sg/) suggested that RNA might be something that's currently more exciting and novel to biologists. 
 I can't explain precisely why, but I found something very interesting about RNA's biochemistry, the intricate structures it folds into, and the stories of the research as well as the scientists behind them. I also found the community to be very welcoming and friendly to newcomers :)
+</details>
 
 **Disclaimer.**
 This document contains a currated list of resources I've been using in order to understand RNA biology and feel motivated to work on RNA design.
@@ -82,4 +84,3 @@ Before you begin, if you like games, do try and play the introductory parts of [
   - [Tailor made: the art of therapeutic mRNA design](https://www.nature.com/articles/s41573-023-00827-x).
 
 - [My playlist](https://youtube.com/playlist?list=PL3xCprBkQzoneWGiypX1QOtq7lORKE-YN&si=US_-b6pBhAWe5ziP) with most of the videos references in this document.
-
