@@ -4,6 +4,7 @@
 # Original repository: https://github.com/drorlab/gvp-pytorch
 ################################################################
 
+from typing import Optional
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -118,16 +119,27 @@ class AutoregressiveMultiGNNv1(torch.nn.Module):
         
         return logits
     
-    def sample(self, batch, n_samples, temperature=0.1, return_logits=False):
+    def sample(
+            self, 
+            batch, 
+            n_samples, 
+            temperature: Optional[float] = 0.1, 
+            logit_bias: Optional[torch.Tensor] = None,
+            return_logits: Optional[bool] = False
+        ):
         '''
         Samples sequences autoregressively from the distribution
         learned by the model.
 
         Args:
-            batch (torch_geometric.data.Data): mini-batch
+            batch (torch_geometric.data.Data): mini-batch containing one
+                RNA backbone to design sequences for
             n_samples (int): number of samples
-            temperature (float): temperature to use in softmax 
-                                 over the categorical distribution
+            temperature (float): temperature to use in softmax over 
+                the categorical distribution
+            logit_bias (torch.Tensor): bias to add to logits during sampling
+                to manually fix or control nucleotides in designed sequences,
+                of shape [n_nodes, 4]
             return_logits (bool): whether to return logits or not
         
         Returns:
@@ -200,6 +212,10 @@ class AutoregressiveMultiGNNv1(torch.nn.Module):
                         h_V_cache[j+1][1][i::num_nodes] = out[1]
                     
                 lgts = self.W_out(out)
+                # Add logit bias if provided to fix or bias positions
+                if logit_bias is not None:
+                    lgts += logit_bias[i]
+                # Sample from logits
                 seq[i::num_nodes] = Categorical(logits=lgts / temperature).sample()
                 h_S[i::num_nodes] = self.W_s(seq[i::num_nodes])
                 logits[i::num_nodes] = lgts
