@@ -2,9 +2,13 @@
 
 **gRNAde** is a **g**eometric deep learning pipeline for 3D **RNA** inverse **de**sign, analogous to [ProteinMPNN](https://github.com/dauparas/ProteinMPNN) for protein design. 
 
-🧬 Tutorial notebook to get started: [gRNAde 101](/tutorial/tutorial.ipynb)
+🧬 Tutorial notebook to get started: [gRNAde 101](/tutorial/tutorial.ipynb) <a target="_blank" href="https://colab.research.google.com/drive/16rXKgbGXBBsHvS_2V84WbfKsJYf9lO4Q">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>
 
-⚙️ Using gRNAde for custom RNA design scenarios: [Design notebook](/notebooks/design.ipynb)
+⚙️ Using gRNAde for custom RNA design scenarios: [Design notebook](/notebooks/design.ipynb) <a target="_blank" href="https://colab.research.google.com/drive/1ajcikLbM9v8_mYwWuZAcVP57nek6UBQD">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>
 
 ✍️ New to 3D RNA modelling? Here's a currated reading + watch list for beginners: [Resources](/tutorial/README.md)
 
@@ -52,12 +56,6 @@ pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -
 mamba install mdanalysis MDAnalysisTests jupyterlab matplotlib seaborn pandas networkx biopython biotite torchmetrics lovely-tensors -c conda-forge
 pip install wandb pyyaml ipdb python-dotenv tqdm lmdb cpdb-protein
 
-# Install X3DNA for secondary structure determination
-cd ~/rna-inverse-folding/tools/
-tar -xvzf x3dna-v2.4-linux-64bit.tar.gz
-./x3dna-v2.4/bin/x3dna_setup
-# Follow the instructions to test your installation
-
 # Install EternaFold for secondary structure prediction
 cd ~/rna-inverse-folding/tools/
 git clone --depth=1 https://github.com/eternagame/EternaFold.git && cd EternaFold/src
@@ -65,6 +63,17 @@ make
 # Notes: 
 # - Multithreaded version of EternaFold did not install for me
 # - To install on MacOS, start a shell in Rosetta using `arch -x86_64 zsh`
+
+# (Optional) Install X3DNA for secondary structure determination
+cd ~/rna-inverse-folding/tools/
+tar -xvzf x3dna-v2.4-linux-64bit.tar.gz
+./x3dna-v2.4/bin/x3dna_setup
+# Follow the instructions to test your installation
+
+# (Optional) Install draw_rna for secondary structure visualization
+cd ~/rna-inverse-folding/tools/
+git clone --depth=1 https://github.com/DasLab/draw_rna.git draw_rna_dir && cd draw_rna_dir
+python setup.py install
 
 # (Optional) Install CD-HIT for sequence identity clustering
 mamba install cd-hit -c bioconda

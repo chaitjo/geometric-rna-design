@@ -1,6 +1,8 @@
 # Getting started with 3D RNA modelling as a machine learner
 
-If you're already an expert in RNA structure modelling and want to get started with using gRNAde, check out [the tutorial notebook](tutorial.ipynb) within this directory. (Collab version coming soon!)
+If you're already an expert in RNA structure modelling and want to get started with using gRNAde, check out [the tutorial notebook](tutorial.ipynb) within this directory. Collab version: <a target="_blank" href="https://colab.research.google.com/drive/16rXKgbGXBBsHvS_2V84WbfKsJYf9lO4Q">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>
 
 If you're a computer scientist or machine learner without much background in biology but keen to enter the RNA world, read on...
 
