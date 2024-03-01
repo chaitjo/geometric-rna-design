@@ -10,12 +10,12 @@ If you're a computer scientist or machine learner without much background in bio
 <summary><b>Why RNA? A personal account.</b></summary>
 The Covid-19 pandemic was a very challenging period for me personally. 
 At the same time, I got interested in reading about and understanding some of the science behind the disease (I had last formally studied biology in 10th grade and didn't enjoy all the fact memorisation).
-In 2022, I began my PhD at Cambridge and was interested in biomolecules.
-I inherently knew that I wanted to motivated my work as a machine learner by biological problems that (hopefully) matter, but I didn't know much biology so I started by reading lots of popular science books. I felt that they were far more approachable, unlike textbooks.
-The pandemic was coming under control largely due to mRNA vaccines and I was feeling very inspired after reading about the scientific lives of [Jennifer Doudna](https://en.wikipedia.org/wiki/The_Code_Breaker) (Nobel Prize for CRISPR) and [Venki Ramakrishnan](https://www.google.co.uk/books/edition/Gene_Machine/sRVsDwAAQBAJ?hl=en) (Nobel Prize for Ribosomes), as well as several of [Siddhartha Mukherjee](https://en.wikipedia.org/wiki/Siddhartha_Mukherjee)'s books.
+In 2022, I began my PhD at Cambridge with <a href="https://www.cl.cam.ac.uk/~pl219/">Pietro Liò</a> and was interested in biomolecules.
+I inherently knew that I wanted to motivated my work as a machine learner by biological problems that (hopefully) matter, but I didn't know much biology so I started having conversations with Pietro and my labmates, as well as reading lots of popular science books. I found casual conversations and books far more approachable, unlike textbooks or courses.
+The pandemic was coming under control largely due to mRNA vaccines and I was feeling very inspired after reading about the scientific lives of <a href="https://en.wikipedia.org/wiki/The_Code_Breaker">Jennifer Doudna</a> (Nobel Prize for CRISPR) and <a href="https://www.google.co.uk/books/edition/Gene_Machine/sRVsDwAAQBAJ?hl=en">Venki Ramakrishnan</a> (Nobel Prize for Ribosomes), as well as several of <a href="https://en.wikipedia.org/wiki/Siddhartha_Mukherjee">Siddhartha Mukherjee</a>'s books.
 
 One uniting theme across everything I was reading and what was happening around me was the central role played by RNA molecules.
-Everybody (including myself) in deep learning was very excited about modelling proteins after AlphaFold happened, but a chance conversation with [Roger Foo](https://www.foo-lab.sg/) suggested that RNA might be something that's currently more exciting and novel to biologists. 
+Everybody (including myself) in deep learning was very excited about modelling proteins after AlphaFold happened, but a chance conversation with <a href="https://www.foo-lab.sg/">Roger Foo</a> suggested that RNA might be something that's currently more exciting and novel to biologists. 
 I can't explain precisely why, but I found something very interesting about RNA's biochemistry, the intricate structures it folds into, and the stories of the research as well as the scientists behind them. I also found the community to be very welcoming and friendly to newcomers :)
 </details>
 
