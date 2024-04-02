@@ -12,10 +12,10 @@
 
 ✍️ New to 3D RNA modelling? Here's a currated reading + watch list for beginners: [Resources](/tutorial/README.md)
 
-📄 For more details on the methodology, see the accompanying paper: ['Multi-State RNA Design with Geometric Multi-Graph Neural Networks'](https://arxiv.org/abs/2305.14749)
-> Chaitanya K. Joshi, Arian R. Jamasb, Ramon Viñas, Charles Harris, Simon Mathis, and Pietro Liò. Multi-State RNA Design with Geometric Multi-Graph Neural Networks. *ICML Computational Biology Workshop, 2023.*
+📄 For more details on the methodology, see the accompanying paper: ['gRNAde: Geometric Deep Learning for 3D RNA inverse design'](https://arxiv.org/abs/2305.14749)
+> Chaitanya K. Joshi, Arian R. Jamasb, Ramon Viñas, Charles Harris, Simon Mathis, Alex Morehead, and Pietro Liò. gRNAde: Geometric Deep Learning for 3D RNA inverse design. *ICML Computational Biology Workshop, 2023.*
 >
->[PDF](https://arxiv.org/abs/2305.14749.abs) | [Tweet](https://twitter.com/chaitjo/status/1662118334412800001) | [Slides](https://www.chaitjo.com/publication/joshi-2023-grnade/gRNAde_slides_CASP_RNA_SIG.pdf)
+>[PDF](https://arxiv.org/abs/2305.14749) | [Tweet](https://twitter.com/chaitjo/status/1662118334412800001) | [Slides](https://www.chaitjo.com/publication/joshi-2023-grnade/gRNAde_slides_CASP_RNA_SIG.pdf)
 
 ![](/tutorial/fig/grnade_pipeline.png)
 
@@ -182,10 +182,10 @@ Each RNA will be processed into the following format (most of the metadata is op
 ## Citation
 
 ```
-@inproceedings{joshi2023grnade,
-  title={Multi-State RNA Design with Geometric Multi-Graph Neural Networks},
-  author={Joshi, Chaitanya K. and Jamasb, Arian R. and Viñas, Ramon and Harris, Charles and Mathis, Simon and Liò, Pietro},
-  booktitle={ICML 2023 Workshop on Computation Biology},
+@article{joshi2023grnade,
+  title={gRNAde: Geometric Deep Learning for 3D RNA inverse design},
+  author={Joshi, Chaitanya K. and Jamasb, Arian R. and Vi{\~n}as, Ramon and Harris, Charles and Mathis, Simon and Morehead, Alex and Li{\`o}, Pietro},
+  journal={arXiv preprint},
   year={2023},
 }
 ```
