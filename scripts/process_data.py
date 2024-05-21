@@ -22,6 +22,7 @@ from MDAnalysis.analysis.rms import rmsd as get_rmsd
 
 from src.data.data_utils import pdb_to_tensor, get_c4p_coords
 from src.data.clustering_utils import cluster_sequence_identity, cluster_structure_similarity
+from src.constants import DATA_PATH
 
 import warnings
 warnings.filterwarnings("ignore", category=biotite.structure.error.IncompleteStructureWarning)
@@ -29,15 +30,13 @@ warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 
-DATA_PATH = os.environ.get("DATA_PATH")
-
 keep_insertions = True
+keep_pseudoknots = False
 
 
 if __name__ == "__main__":
+    
     parser = argparse.ArgumentParser()
-    parser.add_argument('--project_name', dest='project_name', default='gRNAde_v2', type=str)
-    parser.add_argument('--entity', dest='entity', default='chaitjo', type=str)
     parser.add_argument('--expt_name', dest='expt_name', default='process_data', type=str)
     parser.add_argument('--tags', nargs='+', dest='tags', default=[])
     parser.add_argument('--no_wandb', action="store_true")
@@ -45,15 +44,26 @@ if __name__ == "__main__":
 
     # Initialise wandb
     if args.no_wandb:
-        wandb.init(project=args.project_name, entity=args.entity, name=args.expt_name, mode='disabled')
+        wandb.init(
+            project=os.environ.get("WANDB_PROJECT"), 
+            entity=os.environ.get("WANDB_ENTITY"), 
+            config=args.config, 
+            name=args.expt_name, 
+            mode='disabled'
+        )
     else:
         wandb.init(
-            project=args.project_name, 
-            entity=args.entity,
+            project=os.environ.get("WANDB_PROJECT"), 
+            entity=os.environ.get("WANDB_ENTITY"), 
+            config=args.config, 
             name=args.expt_name, 
             tags=args.tags,
             mode='online'
         )
+
+    ##########################
+    # Load metadata csv files
+    ##########################
 
     print("\nLoading non-redundant equivalence class table")
     eq_class_table = pd.read_csv(os.path.join(DATA_PATH, "nrlist_3.306_4.0A.csv"), names=["eq_class", "representative", "members"], dtype=str)
@@ -73,7 +83,6 @@ if __name__ == "__main__":
 
             id_to_eq_class[_member] = row["eq_class"]
             ids_in_class.append(_member)
-        
         eq_class_to_ids[row["eq_class"]] = ids_in_class
 
     print("\nLoading RNAsolo table")
@@ -92,6 +101,10 @@ if __name__ == "__main__":
         if row["pdb_id"].upper() not in id_to_rfam.keys():
             id_to_rfam[row["pdb_id"].upper()] = row["id"]
 
+    ########################
+    # Process raw PDB files
+    ########################
+
     # Initialise empty dictionaries
     id_to_seq = {}
     seq_to_data = {}
@@ -103,15 +116,17 @@ if __name__ == "__main__":
         try:
             structure_id, file_ext = os.path.splitext(filename)
             filenames.set_description(structure_id)
+            # Skip non-PDB files
             if file_ext != ".pdb": continue
 
+            # Load sequence, coordinates, secondary structure and SASA
             sequence, coords, sec_struct, sasa = pdb_to_tensor(
                 os.path.join(DATA_PATH, "raw", filename),
                 keep_insertions=keep_insertions,
-                keep_pseudoknots=False
+                keep_pseudoknots=keep_pseudoknots
             )
 
-            # basic post processing validation:
+            # Basic post processing validation:
             # do not include sequences with less than 10 nucleotides,
             # which is the minimum length for sequence identity clustering
             if len(sequence) <= 10: 
@@ -129,8 +144,10 @@ if __name__ == "__main__":
             struct_type = eq_class_to_type[eq_class] if eq_class in \
                 eq_class_to_type.keys() else "unknown"
 
-            # update dictionary    
+            # Update dictionary    
             if sequence in seq_to_data.keys():
+                
+                # If sequence already exists in seq_to_data,
                 # align coords of current structure to first entry
                 coords_0 = seq_to_data[sequence]['coords_list'][0]
                 R_hat = rotation_matrix(
@@ -147,6 +164,7 @@ if __name__ == "__main__":
                         superposition=True
                     )
 
+                # append data to existing entry
                 seq_to_data[sequence]['id_list'].append(structure_id)
                 seq_to_data[sequence]['coords_list'].append(coords.float())
                 seq_to_data[sequence]['sec_struct_list'].append(sec_struct)
@@ -181,7 +199,11 @@ if __name__ == "__main__":
     print(f"\nSaving (partially) processed data to {DATA_PATH}")
     torch.save(seq_to_data, os.path.join(DATA_PATH, "processed.pt"))
     
-    print("\nClustering at 80% sequence similarity (CD-HIT-EST)")
+    #########################################
+    # Cluster sequences by sequence identity
+    #########################################
+
+    print("\nClustering at 80\% sequence similarity (CD-HIT-EST)")
     id_to_cluster_seqid = cluster_sequence_identity(
         [SeqRecord(Seq(seq), id=data["id_list"][0]) for seq, data in seq_to_data.items()],
         identity_threshold = 0.8,
@@ -199,6 +221,10 @@ if __name__ == "__main__":
     print(f"\nSaving (partially) processed data to {DATA_PATH}")
     torch.save(seq_to_data, os.path.join(DATA_PATH, "processed.pt"))
 
+    #############################################
+    # Cluster structures by structure similarity
+    #############################################
+
     print("\nClustering at 45% structure similarity (US-align)")
     # using first structure per sequence
     cluster_list_structsim = cluster_structure_similarity(
@@ -213,7 +239,7 @@ if __name__ == "__main__":
     print(f"\nSaving processed data to {DATA_PATH}")
     torch.save(seq_to_data, os.path.join(DATA_PATH, "processed.pt"))
 
-    # save to csv
+    # Save processed metadata to csv
     df = pd.DataFrame.from_dict(seq_to_data, orient="index", columns=["id_list", 'rfam_list', 'eq_class_list', 'type_list', 'cluster_seqid0.8', 'cluster_structsim0.45'])
     df["sequence"] = df.index
     df.reset_index(drop=True, inplace=True)
@@ -223,7 +249,7 @@ if __name__ == "__main__":
     df["num_structures"] = df.id_list.apply(lambda x: len(x))
     df.to_csv(os.path.join(DATA_PATH, "processed_df.csv"), index=False)
 
-    # print IDs with errors
+    # Print IDs with errors
     if len(error_ids) > 0:
         print("\nIDs with errors (check manually):")
         for id, error in error_ids:
