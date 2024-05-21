@@ -35,7 +35,7 @@ def print_rna_data(data):
             print(f"{key}:\n\t{value}")
 
 
-def draw_struct(seq, secstruct, c=None, line=False, large_mode=False, cmap='viridis', rotation=0, vmin=None, vmax=None, alpha=None, ax=None):
+def draw_2d_struct(seq, secstruct, c=None, line=False, large_mode=False, cmap='viridis', rotation=0, vmin=None, vmax=None, alpha=None, ax=None):
     '''
     Draw sequence with secondary structure.
     

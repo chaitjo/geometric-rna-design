@@ -119,6 +119,7 @@ class AutoregressiveMultiGNNv1(torch.nn.Module):
         
         return logits
     
+    @torch.no_grad()
     def sample(
             self, 
             batch, 
@@ -149,81 +150,78 @@ class AutoregressiveMultiGNNv1(torch.nn.Module):
             logits (torch.Tensor): logits of shape [n_samples, n_nodes, 4]
                                    (only if return_logits is True)
         ''' 
-        
-        with torch.no_grad():
-
-            h_V = (batch.node_s, batch.node_v)
-            h_E = (batch.edge_s, batch.edge_v)
-            edge_index = batch.edge_index
-        
-            device = edge_index.device
-            num_nodes = h_V[0].shape[0]
-            
-            h_V = self.W_v(h_V)  # (n_nodes, n_conf, d_s), (n_nodes, n_conf, d_v, 3)
-            h_E = self.W_e(h_E)  # (n_edges, n_conf, d_se), (n_edges, n_conf, d_ve, 3)
-            
-            for layer in self.encoder_layers:
-                h_V = layer(h_V, edge_index, h_E)  # (n_nodes, n_conf, d_s), (n_nodes, n_conf, d_v, 3)
-            
-            # Pool multi-conformation features
-            # nodes: (n_nodes, d_s), (n_nodes, d_v, 3)
-            # edges: (n_edges, d_se), (n_edges, d_ve, 3)
-            h_V, h_E = self.pool_multi_conf(h_V, h_E, batch.mask_confs, edge_index)
-            
-            # Repeat features for sampling n_samples times
-            h_V = (h_V[0].repeat(n_samples, 1),
-                   h_V[1].repeat(n_samples, 1, 1))
-            h_E = (h_E[0].repeat(n_samples, 1),
-                   h_E[1].repeat(n_samples, 1, 1))
-            
-            # Expand edge index for autoregressive decoding
-            edge_index = edge_index.expand(n_samples, -1, -1)
-            offset = num_nodes * torch.arange(n_samples, device=device).view(-1, 1, 1)
-            edge_index = torch.cat(tuple(edge_index + offset), dim=-1)
-            # This is akin to 'batching' (in PyG style) n_samples copies of the graph
-            
-            seq = torch.zeros(n_samples * num_nodes, device=device, dtype=torch.int)
-            h_S = torch.zeros(n_samples * num_nodes, self.out_dim, device=device)
-            logits = torch.zeros(n_samples * num_nodes, self.out_dim, device=device)
+        h_V = (batch.node_s, batch.node_v)
+        h_E = (batch.edge_s, batch.edge_v)
+        edge_index = batch.edge_index
     
-            h_V_cache = [(h_V[0].clone(), h_V[1].clone()) for _ in self.decoder_layers]
+        device = edge_index.device
+        num_nodes = h_V[0].shape[0]
+        
+        h_V = self.W_v(h_V)  # (n_nodes, n_conf, d_s), (n_nodes, n_conf, d_v, 3)
+        h_E = self.W_e(h_E)  # (n_edges, n_conf, d_se), (n_edges, n_conf, d_ve, 3)
+        
+        for layer in self.encoder_layers:
+            h_V = layer(h_V, edge_index, h_E)  # (n_nodes, n_conf, d_s), (n_nodes, n_conf, d_v, 3)
+        
+        # Pool multi-conformation features
+        # nodes: (n_nodes, d_s), (n_nodes, d_v, 3)
+        # edges: (n_edges, d_se), (n_edges, d_ve, 3)
+        h_V, h_E = self.pool_multi_conf(h_V, h_E, batch.mask_confs, edge_index)
+        
+        # Repeat features for sampling n_samples times
+        h_V = (h_V[0].repeat(n_samples, 1),
+            h_V[1].repeat(n_samples, 1, 1))
+        h_E = (h_E[0].repeat(n_samples, 1),
+            h_E[1].repeat(n_samples, 1, 1))
+        
+        # Expand edge index for autoregressive decoding
+        edge_index = edge_index.expand(n_samples, -1, -1)
+        offset = num_nodes * torch.arange(n_samples, device=device).view(-1, 1, 1)
+        edge_index = torch.cat(tuple(edge_index + offset), dim=-1)
+        # This is akin to 'batching' (in PyG style) n_samples copies of the graph
+        
+        seq = torch.zeros(n_samples * num_nodes, device=device, dtype=torch.int)
+        h_S = torch.zeros(n_samples * num_nodes, self.out_dim, device=device)
+        logits = torch.zeros(n_samples * num_nodes, self.out_dim, device=device)
 
-            # Decode one token at a time
-            for i in range(num_nodes):
-                
-                h_S_ = h_S[edge_index[0]]
-                h_S_[edge_index[0] >= edge_index[1]] = 0
-                h_E_ = (torch.cat([h_E[0], h_S_], dim=-1), h_E[1])
-                        
-                edge_mask = edge_index[1] % num_nodes == i  # True for all edges where dst is node i
-                edge_index_ = edge_index[:, edge_mask]  # subset all incoming edges to node i
-                h_E_ = tuple_index(h_E_, edge_mask)
-                node_mask = torch.zeros(n_samples * num_nodes, device=device, dtype=torch.bool)
-                node_mask[i::num_nodes] = True  # True for all nodes i and its repeats
-                
-                for j, layer in enumerate(self.decoder_layers):
-                    out = layer(h_V_cache[j], edge_index_, h_E_,
-                               autoregressive_x=h_V_cache[0], node_mask=node_mask)
-                    
-                    out = tuple_index(out, node_mask)  # subset out to only node i and its repeats
-                    
-                    if j < len(self.decoder_layers)-1:
-                        h_V_cache[j+1][0][i::num_nodes] = out[0]
-                        h_V_cache[j+1][1][i::num_nodes] = out[1]
-                    
-                lgts = self.W_out(out)
-                # Add logit bias if provided to fix or bias positions
-                if logit_bias is not None:
-                    lgts += logit_bias[i]
-                # Sample from logits
-                seq[i::num_nodes] = Categorical(logits=lgts / temperature).sample()
-                h_S[i::num_nodes] = self.W_s(seq[i::num_nodes])
-                logits[i::num_nodes] = lgts
+        h_V_cache = [(h_V[0].clone(), h_V[1].clone()) for _ in self.decoder_layers]
 
-            if return_logits:
-                return seq.view(n_samples, num_nodes), logits.view(n_samples, num_nodes, self.out_dim)
-            else:    
-                return seq.view(n_samples, num_nodes)
+        # Decode one token at a time
+        for i in range(num_nodes):
+            
+            h_S_ = h_S[edge_index[0]]
+            h_S_[edge_index[0] >= edge_index[1]] = 0
+            h_E_ = (torch.cat([h_E[0], h_S_], dim=-1), h_E[1])
+                    
+            edge_mask = edge_index[1] % num_nodes == i  # True for all edges where dst is node i
+            edge_index_ = edge_index[:, edge_mask]  # subset all incoming edges to node i
+            h_E_ = tuple_index(h_E_, edge_mask)
+            node_mask = torch.zeros(n_samples * num_nodes, device=device, dtype=torch.bool)
+            node_mask[i::num_nodes] = True  # True for all nodes i and its repeats
+            
+            for j, layer in enumerate(self.decoder_layers):
+                out = layer(h_V_cache[j], edge_index_, h_E_,
+                        autoregressive_x=h_V_cache[0], node_mask=node_mask)
+                
+                out = tuple_index(out, node_mask)  # subset out to only node i and its repeats
+                
+                if j < len(self.decoder_layers)-1:
+                    h_V_cache[j+1][0][i::num_nodes] = out[0]
+                    h_V_cache[j+1][1][i::num_nodes] = out[1]
+                
+            lgts = self.W_out(out)
+            # Add logit bias if provided to fix or bias positions
+            if logit_bias is not None:
+                lgts += logit_bias[i]
+            # Sample from logits
+            seq[i::num_nodes] = Categorical(logits=lgts / temperature).sample()
+            h_S[i::num_nodes] = self.W_s(seq[i::num_nodes])
+            logits[i::num_nodes] = lgts
+
+        if return_logits:
+            return seq.view(n_samples, num_nodes), logits.view(n_samples, num_nodes, self.out_dim)
+        else:    
+            return seq.view(n_samples, num_nodes)
         
     def pool_multi_conf(self, h_V, h_E, mask_confs, edge_index):
 
@@ -345,7 +343,7 @@ class NonAutoregressiveMultiGNNv1(torch.nn.Module):
         
         return logits
     
-    def sample(self, batch, n_samples, temperature=0.1):
+    def sample(self, batch, n_samples, temperature=0.1, return_logits=False):
         
         with torch.no_grad():
 
@@ -364,13 +362,13 @@ class NonAutoregressiveMultiGNNv1(torch.nn.Module):
             h_V = (h_V[0].mean(dim=1), h_V[1].mean(dim=1))
             
             logits = self.W_out(h_V)  # (n_nodes, out_dim)
-
-            logits /= temperature
-            probs = F.softmax(logits, dim=-1)
-
+            probs = F.softmax(logits / temperature, dim=-1)
             seq = torch.multinomial(probs, n_samples, replacement=True)  # (n_nodes, n_samples)
-                
-            return seq.permute(1, 0)
+
+            if return_logits:
+                return seq.permute(1, 0).contiguous(), logits.unsqueeze(0).repeat(n_samples, 1, 1)
+            else:
+                return seq.permute(1, 0).contiguous()
         
     def pool_multi_conf(self, h_V, h_E, mask_confs, edge_index):
 

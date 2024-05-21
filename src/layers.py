@@ -252,46 +252,6 @@ class MultiGVPConvLayer(nn.Module):
             x = self.norm[1](tuple_sum(x, self.dropout[1](dh))) if self.residual else dh
         return x
 
-class NoFFMultiGVPConvLayer(nn.Module):
-    '''
-    GVPConvLayer for handling multiple conformations (encoder-only)
-
-    No position-wise feedforward module.
-    '''
-    def __init__(
-            self, 
-            node_dims, 
-            edge_dims,
-            n_message=2, 
-            drop_rate=.1,
-            activations=(F.silu, torch.sigmoid), 
-            vector_gate=True,
-            residual=True,
-            norm_first=True,
-        ):
-        super(NoFFMultiGVPConvLayer, self).__init__()
-        self.conv = MultiGVPConv(node_dims, node_dims, edge_dims, n_message,
-                                 aggr="mean", activations=activations, vector_gate=vector_gate)
-        self.norm = LayerNorm(node_dims)
-        self.dropout = Dropout(drop_rate)
-
-        self.residual = residual
-        self.norm_first = norm_first
-
-    def forward(self, x, edge_index, edge_attr):
-        '''
-        :param x: tuple (s, V) of `torch.Tensor`
-        :param edge_index: array of shape [2, n_edges]
-        :param edge_attr: tuple (s, V) of `torch.Tensor`
-        '''
-        if self.norm_first:
-            dh = self.conv(self.norm(x), edge_index, edge_attr)
-            x = tuple_sum(x, self.dropout(dh))
-        else:
-            dh = self.conv(x, edge_index, edge_attr)
-            x = self.norm(tuple_sum(x, self.dropout(dh))) if self.residual else dh
-        return x
-
 class MultiGVPConv(MessagePassing):
     '''
     GVPConv for handling multiple conformations

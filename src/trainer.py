@@ -1,23 +1,14 @@
 import os
-import copy
 import numpy as np
-import pandas as pd
 from tqdm import tqdm
 import wandb
 from sklearn.metrics import confusion_matrix
-from torchmetrics.functional.classification import binary_matthews_corrcoef
 
 import torch
-import torch.nn.functional as F
 from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
-from src.data.data_utils import get_c4p_coords
-from src.data.sec_struct_utils import (
-    predict_sec_struct,
-    dotbracket_to_paired,
-    dotbracket_to_adjacency
-)
+from src.evaluator import evaluate
 from src.constants import NUM_TO_LETTER
 
 
@@ -31,6 +22,14 @@ def train(
     ):
     """
     Train RNA inverse folding model using the specified config and data loaders.
+
+    Args:
+        config (dict): wandb configuration dictionary 
+        model (nn.Module): RNA inverse folding model to be trained
+        train_loader (DataLoader): training data loader
+        val_loader (DataLoader): validation data loader
+        test_loader (DataLoader): test data loader
+        device (torch.device): device to train the model on
     """
 
     # Initialise loss function
@@ -41,6 +40,10 @@ def train(
     lr = config.lr
     optimizer = Adam(model.parameters(), lr)
     scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.9, patience=1, min_lr=0.00001)
+
+    if device.type == 'xpu':
+        import intel_extension_for_pytorch as ipex
+        model, optimizer = ipex.optimize(model, optimizer=optimizer)
     
     # Initialise lookup table mapping integers to nucleotides
     lookup = train_loader.dataset.featurizer.num_to_letter
@@ -48,7 +51,10 @@ def train(
     # Initialise best checkpoint information
     best_epoch, best_val_loss, best_val_acc = -1, np.inf, 0
     
-    # Training loop
+    ##################################
+    # Training loop over mini-batches
+    ##################################
+
     for epoch in range(config.epochs):
         
         # Training iteration
@@ -99,45 +105,64 @@ def train(
         # Evaluate best checkpoint
         print(f"EVALUATION: loading {os.path.join(wandb.run.dir, 'best_checkpoint.h5')} (epoch {best_epoch})")
         model.load_state_dict(torch.load(os.path.join(wandb.run.dir, 'best_checkpoint.h5')))
-
-        # val set
-        val_df, val_samples_list, val_recovery_list, val_scscore_list = evaluate(
-            model, 
-            val_loader.dataset, 
-            config.n_samples, 
-            config.temperature, 
-            device, 
-            model_name="val"
-        )
-        wandb.run.summary["best_val_recovery"] = np.mean(val_recovery_list)
-        wandb.run.summary["best_val_scscore"] = np.mean(val_scscore_list)
-        print(f"BEST VAL recovery: {np.mean(val_recovery_list):.4f} scscore: {np.mean(val_scscore_list):.4f}")
-        torch.save(
-            (val_df, val_samples_list, val_recovery_list, val_scscore_list),
-            os.path.join(wandb.run.dir, f"val_results.pt")
-        )
-
-        # test set
-        test_df, test_samples_list, test_recovery_list, test_scscore_list = evaluate(
-            model, 
-            test_loader.dataset, 
-            config.n_samples, 
-            config.temperature, 
-            device, 
-            model_name="test"
-        )
-        wandb.run.summary["best_test_recovery"] = np.mean(test_recovery_list)
-        wandb.run.summary["best_test_scscore"] = np.mean(test_scscore_list)
-        print(f"BEST TEST recovery: {np.mean(test_recovery_list):.4f} scscore: {np.mean(test_scscore_list):.4f}")
-        torch.save(
-            (test_df, test_samples_list, test_recovery_list, test_scscore_list),
-            os.path.join(wandb.run.dir, f"test_results.pt")
-        )
+        
+        for loader, set_name in [(test_loader, "test"), (val_loader, "val")]:
+            # Run evaluator
+            df, samples_list, recovery_list, perplexity_list, \
+            scscore_list, scscore_ribonanza_list, \
+            scscore_rmsd_list, scscore_tm_list, scscore_gdt_list = evaluate(
+                model, 
+                loader.dataset, 
+                config.n_samples, 
+                config.temperature, 
+                device, 
+                model_name=set_name,
+                metrics=['recovery', 'perplexity', 'sc_score_eternafold', 'sc_score_ribonanzanet', 'sc_score_rhofold'],
+                save_structures=True
+            )
+            # Update wandb summary metrics
+            wandb.run.summary[f"best_{set_name}_recovery"] = np.mean(recovery_list)
+            wandb.run.summary[f"best_{set_name}_perplexity"] = np.mean(perplexity_list)
+            wandb.run.summary[f"best_{set_name}_scscore"] = np.mean(scscore_list)
+            wandb.run.summary[f"best_{set_name}_scscore_ribonanza"] = np.mean(scscore_ribonanza_list)
+            wandb.run.summary[f"best_{set_name}_scscore_rmsd"] = np.mean(scscore_rmsd_list)
+            wandb.run.summary[f"best_{set_name}_scscore_tm"] = np.mean(scscore_tm_list)
+            wandb.run.summary[f"best_{set_name}_scscore_gdt"] = np.mean(scscore_gdt_list)
+            print(f"BEST {set_name} recovery: {np.mean(recovery_list):.4f}\
+                    perplexity: {np.mean(perplexity_list):.4f}\
+                    scscore: {np.mean(scscore_list):.4f}\
+                    scscore_ribonanza: {np.mean(scscore_ribonanza_list):.4f}\
+                    scscore_rmsd: {np.mean(scscore_rmsd_list):.4f}\
+                    scscore_tm: {np.mean(scscore_tm_list):.4f}\
+                    scscore_gdt: {np.mean(scscore_gdt_list):.4f}") 
+            # Save results
+            torch.save(
+                (df, samples_list, recovery_list, perplexity_list,
+                 scscore_list, scscore_ribonanza_list, 
+                 scscore_rmsd_list, scscore_tm_list, scscore_gdt_list),
+                os.path.join(wandb.run.dir, f"{set_name}_results.pt")
+            )
 
 
 def loop(model, dataloader, loss_fn, optimizer=None, device='cpu'):
     """
-    Training loop for a single epoch.
+    Training loop for a single epoch over the data loader.
+
+    Args:
+        model (nn.Module): RNA inverse folding model
+        dataloader (DataLoader): data loader for the current epoch
+        loss_fn (nn.Module): loss function to compute the loss
+        optimizer (torch.optim): optimizer to update model parameters
+        device (torch.device): device to train the model on
+    
+    Note:
+        This function is used for both training and evaluation loops.
+        Not passing an optimizer will run the model in evaluation mode.
+
+    Returns:
+        float: average loss over the epoch
+        float: average accuracy over the epoch
+        np.ndarray: confusion matrix over the epoch
     """
 
     confusion = np.zeros((model.out_dim, model.out_dim))
@@ -181,213 +206,6 @@ def loop(model, dataloader, loss_fn, optimizer=None, device='cpu'):
         t.set_description("%.5f" % float(total_loss/total_count))
         
     return total_loss / total_count, total_correct / total_count, confusion
-
-
-def evaluate(
-        model, 
-        dataset, 
-        n_samples, 
-        temperature, 
-        device, 
-        model_name="eval"
-    ):
-    """
-    Run evaluation suite for trained RNA inverse folding model on a dataset.
-
-    The following metrics are computed:
-    1. Sequence recovery per residue (taking mean gives per sample recovery)
-    2. Self consistency score per sample, based on predicted secondary structure
-    ...along with metadata per sample per residue.
-
-    Args:
-        model: trained RNA inverse folding model
-        dataset: dataset to evaluate on
-        n_samples: number of predicted samples/sequences per data point 
-        temperature: sampling temperature
-        device: device to run evaluation on
-        model_name: name of model/dataset for plotting
-    """
-
-    # per sample metric lists
-    samples_list = []   # list of tensors of shape (n_samples, seq_len) per data point 
-    recovery_list = []  # list of mean recovery per data point
-    sc_score_list = []  # list of mean self-consistency scores per data point
-
-    # DataFrame to store metrics and metadata per residue per sample for analysis and plotting
-    df = pd.DataFrame(columns=['idx', 'recovery', 'sasa', 'paired', 'rmsds', 'model_name'])
-
-    model.eval()
-    with torch.no_grad():
-        for idx, raw_data in tqdm(
-            enumerate(dataset.data_list),
-            total=len(dataset.data_list)
-        ):
-            # featurise raw data
-            data = dataset.featurizer(raw_data).to(device)
-
-            # sample n_samples from model for single data point: n_samples x seq_len
-            samples = model.sample(data, n_samples, temperature)
-
-            ###########
-            # Metadata
-            ###########
-
-            # per residue average SASA: seq_len x 1
-            mask_coords = data.mask_coords.cpu().numpy()
-            sasa = np.mean(raw_data['sasa_list'], axis=0)[mask_coords]
-
-            # per residue indicator for paired/unpaired: seq_len x 1
-            paired = np.mean(
-                [dotbracket_to_paired(sec_struct) for sec_struct in raw_data['sec_struct_list']], axis=0
-            )[mask_coords]
-
-            # per residue average RMSD: seq_len x 1
-            if len(raw_data["coords_list"]) == 1:
-                rmsds = np.zeros_like(sasa)
-            else:
-                rmsds = []
-                for i in range(len(raw_data["coords_list"])):
-                    for j in range(i+1, len(raw_data["coords_list"])):
-                        coords_i = get_c4p_coords(raw_data["coords_list"][i])
-                        coords_j = get_c4p_coords(raw_data["coords_list"][j])
-                        rmsds.append(torch.sqrt(torch.sum((coords_i - coords_j)**2, dim=1)).cpu().numpy())
-                rmsds = np.stack(rmsds).mean(axis=0)[mask_coords]
-
-            ##########
-            # Metrics
-            ##########
-
-            # sequence recovery per residue across all samples: seq_len x 1 
-            recovery = samples.eq(data.seq).float().mean(dim=0).cpu().numpy()
-
-            # global self consistency score per sample: n_samples x 1
-            sc_score = self_consistency_score(
-                samples.cpu().numpy(), 
-                raw_data['sec_struct_list'], 
-                mask_coords
-            )
-
-            # update per residue per sample dataframe
-            df = pd.concat([
-                df, 
-                pd.DataFrame({
-                    'idx': [idx] * len(recovery),
-                    'recovery': recovery,
-                    'sasa': sasa,
-                    'paired': paired,
-                    'rmsds': rmsds,
-                    'model_name': [model_name] * len(recovery)
-                })
-            ], ignore_index=True)
-
-            # update per sample lists
-            samples_list.append(samples.cpu().numpy())
-            recovery_list.append(recovery.mean())
-            sc_score_list.append(sc_score.mean())
-    
-    return df, samples_list, recovery_list, sc_score_list
-
-
-def self_consistency_score(
-        samples, 
-        true_sec_struct_list, 
-        mask_coords,
-        n_samples_ss = 1,
-        num_to_letter = NUM_TO_LETTER,
-        return_sec_structs = False
-    ):
-    """
-    Compute self consistency score for an RNA, given its true secondary structure(s)
-    and a list of designed sequences. EternaFold is used to 'forward fold' the designs.
-    
-    Args:
-        samples: designed sequences of shape (n_samples, seq_len)
-        true_sec_struct_list: list of true secondary structures (n_true_ss, seq_len)
-        mask_coords: mask for missing sequence coordinates to be ignored during evaluation
-        n_samples_ss: number of predicted secondary structures per designed sample
-        num_to_letter: lookup table mapping integers to nucleotides
-        return_sec_structs: whether to return the predicted secondary structures
-    
-    Workflow:
-        
-        Input: For a given RNA molecule, we are given:
-            Designed sequences of shape (n_samples, seq_len)
-            True secondary structure(s) of shape (n_true_ss, seq_len)
-        
-        For each designed sequence:
-            
-            Predict n_sample_ss secondary structures using EternaFold
-            
-            For each pair of true and predicted secondary structures:
-                Compute MCC score between them
-            
-            Take the average MCC score across all n_sample_ss predicted structures
-        
-        Take the average MCC score across all n_samples designed sequences
-    """
-    
-    n_true_ss = len(true_sec_struct_list)
-    sequence_length = mask_coords.sum()
-    # map all entries from dotbracket to numerical representation
-    true_sec_struct_list = np.array([dotbracket_to_adjacency(ss) for ss in true_sec_struct_list])
-    # mask out missing sequence coordinates
-    true_sec_struct_list = true_sec_struct_list[:, mask_coords][:, :, mask_coords]
-    # reshape to (n_true_ss * n_samples_ss, seq_len, seq_len)
-    true_sec_struct_list = torch.tensor(
-        true_sec_struct_list
-    ).unsqueeze(1).repeat(1, n_samples_ss, 1, 1).reshape(-1, sequence_length, sequence_length)
-
-    mcc_scores = []
-    pred_sec_structs = []
-    for _sample in samples:
-        # convert sample to string
-        pred_seq = ''.join([num_to_letter[num] for num in _sample])
-        # predict secondary structure(s) for each sample
-        pred_sec_struct_list = predict_sec_struct(pred_seq, n_samples=n_samples_ss)
-        if return_sec_structs:
-            pred_sec_structs.append(copy.copy(pred_sec_struct_list))
-        # map all entries from dotbracket to numerical representation
-        pred_sec_struct_list = np.array([dotbracket_to_adjacency(ss) for ss in pred_sec_struct_list])
-        # reshape to (n_samples_ss * n_true_ss, seq_len, seq_len)
-        pred_sec_struct_list = torch.tensor(
-            pred_sec_struct_list
-        ).unsqueeze(0).repeat(n_true_ss, 1, 1, 1).reshape(-1, sequence_length, sequence_length)
-
-        # compute mean MCC score between pairs of true and predicted secondary structures
-        mcc_scores.append(
-            binary_matthews_corrcoef(
-                pred_sec_struct_list,
-                true_sec_struct_list,
-            ).float().mean()
-        )
-
-    if return_sec_structs:
-        return np.array(mcc_scores), pred_sec_structs
-    else:
-        return np.array(mcc_scores)
-
-
-def self_consistency_score_ribonanza(
-        samples, 
-        true_chem_mod, 
-        ribonanza_net,
-        num_to_letter = NUM_TO_LETTER,
-        return_chem_mods = False
-    ):
-    """
-    Compute self consistency score for an RNA, given its predicted chemical modifiers using
-    RibonanzaNet and a list of designed sequences. 
-    RibonanzaNet is used to 'forward probe' the designs by predicting their 
-    chemical modifiers (2A3 and DMS) and computing MAE to the groundtruth sequence.
-    
-    Requires: https://github.com/Shujun-He/RibonanzaNet/
-    """
-    _samples = np.array([[num_to_letter[num] for num in seq] for seq in samples])
-    pred_chem_mod = ribonanza_net.predict(_samples)
-    if return_chem_mods:
-        return (np.abs(pred_chem_mod - true_chem_mod)).mean(2).mean(1), pred_chem_mod
-    else:
-        return (np.abs(pred_chem_mod - true_chem_mod)).mean(2).mean(1)
 
 
 def print_and_log(
