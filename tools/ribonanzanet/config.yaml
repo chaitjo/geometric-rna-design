@@ -1,0 +1,26 @@
+# Model hyperparameters
+learning_rate: 0.001  # The learning rate for the optimizer
+batch_size: 2         # Number of samples per batch
+test_batch_size: 8    # Number of samples per batch
+epochs: 40            # Total training epochs
+optimizer: "ranger"   # Optimization algorithm
+dropout: 0.05         # Dropout regularization rate
+weight_decay: 0.0001
+k: 5
+ninp: 256
+nlayers: 9
+nclass: 2
+ntoken: 5             # AUGC + padding/N token
+nhead: 8
+use_bpp: False
+bpp_file_folder: "../../input/bpp_files/"
+gradient_accumulation_steps: 2
+use_triangular_attention: false
+pairwise_dimension: 64
+use_grad_checkpoint: true
+
+# Other configurations
+fold: 0
+nfolds: 6
+input_dir: "../../input/"
+gpu_id: "0"
