@@ -199,7 +199,7 @@ Each RNA will be processed into the following format (most of the metadata is op
 }
 ```
 
-Wwe have provided the splits used in our experiments in the `data/` directory:
+We have provided the splits used in our experiments in the `data/` directory:
 - Single-state split from [Das et al., 2010](https://www.nature.com/articles/nmeth.1433): `data/das_split.pt` (called the Das split for compatibility with older code)
 - Multi-state split of structurally flexible RNAs: `data/structsim_split.pt`
 
