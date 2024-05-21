@@ -69,14 +69,14 @@ class RNAGraphFeaturizer(object):
 
     def __call__(self, rna):
         with torch.no_grad():
-            # Target sequence: num_atoms x 1
+            # Target sequence: num_res x 1
             seq = torch.as_tensor(
                 [self.letter_to_num[residue] for residue in rna['sequence']], 
                 device=self.device, 
                 dtype=torch.long
             )
             
-            # Set of coordinates: num_conf x num_atoms x num_atoms x 3
+            # Set of coordinates: num_conf x num_res x num_bb_atoms x 3
             coords_list, mask_coords, mask_confs = get_k_random_entries_and_masks(
                 rna['coords_list'], k = self.max_num_conformers
             )
@@ -91,7 +91,7 @@ class RNAGraphFeaturizer(object):
             if self.split == 'train':
                 coords_list += torch.randn_like(coords_list, device=self.device) * self.noise_scale
 
-            # Mask for missing coordinates for any backbone atom: num_atoms
+            # Mask for missing coordinates for any backbone atom: num_res
             mask_coords = torch.BoolTensor(mask_coords)
             # Also mask non-standard nucleotides
             mask_coords = (mask_coords) & (seq != self.letter_to_num["_"])
@@ -109,7 +109,7 @@ class RNAGraphFeaturizer(object):
             internal_coords_feat = internal_coords_feat[:, mask_coords]
             internal_vecs_feat = internal_vecs_feat[:, mask_coords]
 
-            # Mask for extra coordinates if fewer than num_conf: num_atoms x num_conf
+            # Mask for extra coordinates if fewer than num_conf: num_res x num_conf
             mask_confs = torch.BoolTensor(mask_confs).repeat(len(seq), 1)
 
             # Construct merged edge index
@@ -121,12 +121,12 @@ class RNAGraphFeaturizer(object):
                 torch.concat(edge_index, dim=1)
             ))
 
-            # Reshape: num_atoms x num_conf x ...
+            # Reshape: num_res x num_conf x ...
             coords_list = coords_list.permute(1, 0, 2, 3) # coords_list[:, :, 1].permute(1, 0, 2)
             internal_coords_feat = internal_coords_feat.permute(1, 0, 2)
             internal_vecs_feat = internal_vecs_feat.permute(1, 0, 2, 3)
             
-            # Edge displacement vectors: num_edges x num_conf x num_atoms x 3
+            # Edge displacement vectors: num_edges x num_conf x num_res x 3
             edge_vectors = coords_list[edge_index[0]] - coords_list[edge_index[1]]
             edge_lengths = torch.sqrt((edge_vectors ** 2).sum(dim=-1) + self.distance_eps) #.unsqueeze(-1)
 
@@ -148,14 +148,14 @@ class RNAGraphFeaturizer(object):
             )
             
         data = torch_geometric.data.Data(
-            seq = seq,                  # num_atoms x 1
-            node_s = node_s,            # num_atoms x num_conf x (num_bb_atoms x 5)
-            node_v = node_v,            # num_atoms x num_conf x (2 + (num_bb_atoms - 1)) x 3
+            seq = seq,                  # num_res x 1
+            node_s = node_s,            # num_res x num_conf x (num_bb_atoms x 5)
+            node_v = node_v,            # num_res x num_conf x (2 + (num_bb_atoms - 1)) x 3
             edge_s = edge_s,            # num_edges x num_conf x (num_bb_atoms x num_rbf + num_posenc + num_bb_atoms)
             edge_v = edge_v,            # num_edges x num_conf x num_bb_atoms x 3
             edge_index = edge_index,    # 2 x num_edges
-            mask_confs = mask_confs,    # num_atoms x num_conf
-            mask_coords = mask_coords,  # num_atoms
+            mask_confs = mask_confs,    # num_res x num_conf
+            mask_coords = mask_coords,  # num_res
         )
         return data
     
@@ -216,6 +216,47 @@ class RNAGraphFeaturizer(object):
             rna['sec_struct_list'].append(sec_struct)
         
         return self(rna), rna
+
+
+def get_k_random_entries_and_masks(coords_list, k):
+    """
+    Returns k random entries from a list of 3D coordinates, along with
+    the corresponding masks (1 = valid, 0 = not valid).
+    
+    Args:
+        coords_list (list): List of np.array entries of 3D coordinates
+        k (int): number of random entries to be selected from coords_list
+    
+    Returns:
+        confs_list (np.array): Coordinates array of shape (k, num_residues, num_atoms, 3)
+        mask_coords (np.array): Mask of valid coordinates of shape (num_atoms)
+        mask_confs (np.array): Mask of valid conformers of shape (k)
+    """
+    n = len(coords_list)
+    coords_list = np.array(coords_list)
+    # if k > n:
+    #     # If k is greater than the length of the list,
+    #     # return all the entries in the list and pad zeros up to k
+    #     zeros_arr = np.zeros_like(coords_list[0])
+    #     confs_list = np.concatenate((coords_list, [zeros_arr] * (k - n)), axis=0)
+    #     mask_coords = (coords_list == FILL_VALUE).sum(axis=(0,2,3)) == 0
+    #     mask_confs = np.array([1]*n + [0]*(k - n))
+    if k > n:
+        # If k is greater than the length of the list,
+        # return all the entries in the list and pad random entries up to k
+        rand_idx = np.random.choice(n, size=k-n, replace=True)
+        confs_list = np.concatenate((coords_list, coords_list[rand_idx]), axis=0)
+        mask_coords = (coords_list == FILL_VALUE).sum(axis=(0,2,3)) == 0
+        mask_confs = np.array([1]*k)
+    else:
+        # If k is less than or equal to the length of the list, 
+        # randomly select k entries
+        rand_idx = np.random.choice(n, size=k, replace=False)
+        confs_list =  coords_list[rand_idx]
+        mask_coords = (confs_list == FILL_VALUE).sum(axis=(0,2,3)) == 0
+        mask_confs = np.array([1]*k)
+
+    return confs_list, mask_coords, mask_confs
 
 
 def internal_coords(
@@ -510,7 +551,7 @@ def positional_encoding(inputs, num_posenc=32, period_range=(1.0, 1000.0)):
 
 def internal_vecs(X):
     # Relative displacement vectors along backbone
-    # X : num_conf x num_atoms x num_atoms x 3
+    # X : num_conf x num_res x num_bb_atoms x 3
     p, c4p, n = X[:, :, 0], X[:, :, 1], X[:, :, 2]
     n, p = n - c4p, p - c4p
     forward = F.pad(c4p[:, 1:] - c4p[:, :-1], [0, 0, 0, 1])

@@ -15,10 +15,10 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from src.trainer import self_consistency_score
 from src.data.featurizer import RNAGraphFeaturizer
 from src.models import AutoregressiveMultiGNNv1
 from src.data.data_utils import get_backbone_coords
+from src.evaluator import edit_distance, self_consistency_score_eternafold
 from src.constants import (
     NUM_TO_LETTER, 
     RNA_ATOMS, 
@@ -312,7 +312,7 @@ class gRNAde(object):
         recovery = samples.eq(featurized_data.seq).float().mean(dim=1).cpu().numpy()
 
         # global self consistency score per sample: n_samples x 1
-        sc_score = self_consistency_score(
+        sc_score = self_consistency_score_eternafold(
             samples.cpu().numpy(), 
             raw_data['sec_struct_list'], 
             featurized_data.mask_coords.cpu().numpy()
@@ -336,10 +336,11 @@ class gRNAde(object):
         )):
             seq, perp, rec, sc = zipped
             seq = "".join([NUM_TO_LETTER[num] for num in seq])
+            edit_dist = edit_distance(seq, raw_data['sequence'])
             sequences.append(SeqRecord(
                 Seq(seq), 
                 id=f"sample={idx},",
-                description=f"temperature={temperature}, perplexity={perp:.4f}, recovery={rec:.4f}, sc_score={sc:.4f}"
+                description=f"seed={seed}, temperature={temperature}, perplexity={perp:.4f}, recovery={rec:.4f}, edit_dist={edit_dist}, sc_score={sc:.4f}"
             ))
         
         if output_filepath is not None:

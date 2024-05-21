@@ -1,15 +1,16 @@
 import dotenv
 dotenv.load_dotenv(".env")
 
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 import os
 import random
 import argparse
 import wandb
 import numpy as np
-
-from lovely_numpy import lo
-import lovely_tensors as lt
-lt.monkey_patch()
 
 import torch
 import torch_geometric
@@ -23,31 +24,14 @@ from src.models import (
 )
 from src.constants import DATA_PATH
 
-import warnings
-warnings.filterwarnings("ignore", category=RuntimeWarning)
-warnings.filterwarnings("ignore", category=FutureWarning)
-
 
 def main(config, device):
     """
     Main function for training and evaluating gRNAde.
     """
     # Set seed
-    set_seed(config.seed)
+    set_seed(config.seed, device.type)
 
-    # Get train, val, test data samples as lists
-    train_list, val_list, test_list = get_data_splits(config, split_type=config.split)
-
-    # Load datasets
-    trainset = get_dataset(config, train_list, split="train")
-    valset = get_dataset(config, val_list, split="val")
-    testset = get_dataset(config, test_list, split="test")
-
-    # Prepare dataloaders
-    train_loader = get_dataloader(config, trainset, shuffle=True)
-    val_loader = get_dataloader(config, valset, shuffle=False)
-    test_loader = get_dataloader(config, testset, shuffle=False)
-    
     # Initialise model
     model = get_model(config).to(device)
     total_param = 0
@@ -58,47 +42,65 @@ def main(config, device):
 
     # Load checkpoint
     if config.model_path != '':
-        model.load_state_dict(torch.load(config.model_path))
+        model.load_state_dict(torch.load(config.model_path, map_location=device))
     
     if config.evaluate:
-        # val set
-        val_df, val_samples_list, val_recovery_list, val_scscore_list = evaluate(
-            model, 
-            val_loader.dataset, 
-            config.n_samples, 
-            config.temperature, 
-            device, 
-            model_name="val"
-        )
-        wandb.run.summary["best_val_recovery"] = np.mean(val_recovery_list)
-        wandb.run.summary["best_val_scscore"] = np.mean(val_scscore_list)
-        print(f"VAL recovery: {np.mean(val_recovery_list):.4f} \
-              scscore: {np.mean(val_scscore_list):.4f}")
-        torch.save(
-            (val_df, val_samples_list, val_recovery_list, val_scscore_list),
-            os.path.join(wandb.run.dir, f"val_results.pt")
-        )
+        # Load test set
+        _, _, test_list = get_data_splits(config, split_type=config.split)
+        testset = get_dataset(config, test_list, split="test")
+        test_loader = get_dataloader(config, testset, shuffle=False)
 
-        # test set
-        test_df, test_samples_list, test_recovery_list, test_scscore_list = evaluate(
+        # Run evaluator + save designed structures
+        df, samples_list, recovery_list, perplexity_list, \
+        scscore_list, scscore_ribonanza_list, \
+        scscore_rmsd_list, scscore_tm_list, scscore_gdt_list = evaluate(
             model, 
             test_loader.dataset, 
             config.n_samples, 
             config.temperature, 
             device, 
-            model_name="test"
+            model_name="test",
+            metrics=['recovery', 'perplexity', 'sc_score_eternafold', 'sc_score_ribonanzanet', 'sc_score_rhofold'],
+            save_structures=True
         )
-        wandb.run.summary["best_test_recovery"] = np.mean(test_recovery_list)
-        wandb.run.summary["best_test_scscore"] = np.mean(test_scscore_list)
-        print(f"TEST recovery: {np.mean(test_recovery_list):.4f} \
-              scscore: {np.mean(test_scscore_list):.4f}")
+        # Update wandb summary metrics
+        wandb.run.summary[f"best_test_recovery"] = np.mean(recovery_list)
+        wandb.run.summary[f"best_test_perplexity"] = np.mean(perplexity_list)
+        wandb.run.summary[f"best_test_scscore"] = np.mean(scscore_list)
+        wandb.run.summary[f"best_test_scscore_ribonanza"] = np.mean(scscore_ribonanza_list)
+        wandb.run.summary[f"best_test_scscore_rmsd"] = np.mean(scscore_rmsd_list)
+        wandb.run.summary[f"best_test_scscore_tm"] = np.mean(scscore_tm_list)
+        wandb.run.summary[f"best_test_scscore_gdt"] = np.mean(scscore_gdt_list)
+        print(f"BEST test recovery: {np.mean(recovery_list):.4f}\
+                perplexity: {np.mean(perplexity_list):.4f}\
+                scscore: {np.mean(scscore_list):.4f}\
+                scscore_ribonanza: {np.mean(scscore_ribonanza_list):.4f}\
+                scscore_rmsd: {np.mean(scscore_rmsd_list):.4f}\
+                scscore_tm: {np.mean(scscore_tm_list):.4f}\
+                scscore_gdt: {np.mean(scscore_gdt_list):.4f}")
+        # Save results
         torch.save(
-            (test_df, test_samples_list, test_recovery_list, test_scscore_list),
-            os.path.join(wandb.run.dir, f"test_results.pt")
-        )
+                (df, samples_list, recovery_list, perplexity_list, 
+                 scscore_list, scscore_ribonanza_list, 
+                 scscore_rmsd_list, scscore_tm_list, scscore_gdt_list),
+                os.path.join(wandb.run.dir, f"test_results.pt")
+            )
 
     else:
-        # Training loop
+        # Get train, val, test data samples as lists
+        train_list, val_list, test_list = get_data_splits(config, split_type=config.split)
+
+        # Load datasets
+        trainset = get_dataset(config, train_list, split="train")
+        valset = get_dataset(config, val_list, split="val")
+        testset = get_dataset(config, test_list, split="test")
+
+        # Prepare dataloaders
+        train_loader = get_dataloader(config, trainset, shuffle=True)
+        val_loader = get_dataloader(config, valset, shuffle=False)
+        test_loader = get_dataloader(config, testset, shuffle=False)
+        
+        # Run trainer
         train(config, model, train_loader, val_loader, test_loader, device)
 
 
@@ -143,7 +145,6 @@ def get_dataloader(
         dataset, 
         shuffle=True,
         pin_memory=True,
-        # drop_last=False,
         exclude_keys=[],
     ):
     """
@@ -154,7 +155,6 @@ def get_dataloader(
         config (dict): wandb configuration dictionary
         shuffle (bool): whether to shuffle the dataset
         pin_memory (bool): whether to pin memory
-        # drop_last (bool): whether to drop the last batch
         exclue_keys (list): list of keys to exclude during batching
     """
     return DataLoader(
@@ -167,7 +167,6 @@ def get_dataloader(
             shuffle = shuffle,
         ),
         pin_memory = pin_memory,
-        # drop_last = drop_last,
         exclude_keys = exclude_keys
     )
 
@@ -192,7 +191,7 @@ def get_model(config):
     )
 
 
-def set_seed(seed=0):
+def set_seed(seed=0, device_type='cpu'):
     """
     Sets random seed for reproducibility.
     """
@@ -203,6 +202,11 @@ def set_seed(seed=0):
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
+    
+    if device_type == 'xpu':
+        import intel_extension_for_pytorch as ipex
+        torch.xpu.manual_seed(seed)
+        torch.xpu.manual_seed_all(seed)
 
 
 if __name__ == "__main__":
@@ -238,8 +242,13 @@ if __name__ == "__main__":
         config_str += f"\n    {key}: {val}"
     print(config_str)
 
-    # Set device (GPU/CPU)
-    device = torch.device("cuda:{}".format(config.gpu) if torch.cuda.is_available() else "cpu")
+    # Set device (GPU/CPU/XPU)
+    if config.device == 'xpu':
+        import intel_extension_for_pytorch as ipex
+        [print(f'[{i}]: {torch.xpu.get_device_properties(i)}') for i in range(torch.xpu.device_count())]
+        device = torch.device("xpu:{}".format(config.gpu) if torch.xpu.is_available() else 'cpu')
+    else:
+        device = torch.device("cuda:{}".format(config.gpu) if torch.cuda.is_available() else "cpu")
     
     # Run main function
     main(config, device)
