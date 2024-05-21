@@ -1,7 +1,7 @@
 program: main.py
 method: grid
 name: gRNAde_sweep
-description: "gRNAde W&B sweep template"
+description: "gRNAde W&B sweep template for reproducing benchmark results"
 
 entity: chaitjo
 project: gRNAde
@@ -9,6 +9,8 @@ project: gRNAde
 parameters:
   
   # Misc configurations
+  device:
+    value: 'gpu'
   gpu:
     value: 0
   seed:
@@ -41,20 +43,23 @@ parameters:
   max_nodes_batch:
     value: 3000
   max_nodes_sample:
-    value: 5000
+    values: 
+    - 500
+    - 1000
+    - 2000
+    - 5000
 
   # Splitting configurations
   split:
     values: 
     - 'das'
     - 'structsim'
-    - 'seqid'
 
   # Model configurations
   model:
     values: 
-    - 'NARv1'
     - 'ARv1'
+    - 'NARv1'
   node_in_dim:
     value: [15, 4]  # (num_bb_atoms x 5, 2 + num_bb_atoms - 1)
   node_h_dim:

@@ -1,4 +1,7 @@
 # Misc configurations
+device:
+  value: 'gpu'
+  desc: Device to run on (cpu/cuda/xpu)
 gpu:
   value: 0
   desc: GPU ID
