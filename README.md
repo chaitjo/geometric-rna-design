@@ -2,20 +2,9 @@
 
 **gRNAde** is a **g**eometric deep learning pipeline for 3D **RNA** inverse **de**sign, analogous to [ProteinMPNN](https://github.com/dauparas/ProteinMPNN) for protein design. 
 
-🧬 Tutorial notebook to get started: [gRNAde 101](/tutorial/tutorial.ipynb) <a target="_blank" href="https://colab.research.google.com/drive/16rXKgbGXBBsHvS_2V84WbfKsJYf9lO4Q">
-  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
-</a>
+🧬 Tutorial notebook to get started: [gRNAde 101](/tutorial/tutorial.ipynb)
 
-⚙️ Using gRNAde for custom RNA design scenarios: [Design notebook](/notebooks/design.ipynb) <a target="_blank" href="https://colab.research.google.com/drive/1ajcikLbM9v8_mYwWuZAcVP57nek6UBQD">
-  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
-</a>
-
-✍️ New to 3D RNA modelling? Here's a currated reading + watch list for beginners: [Resources](https://www.chaitjo.com/post/rna-modelling-and-design/)
-
-📄 For more details on the methodology, see the accompanying paper: ['gRNAde: Geometric Deep Learning for 3D RNA inverse design'](https://arxiv.org/abs/2305.14749)
-> Chaitanya K. Joshi, Arian R. Jamasb, Ramon Viñas, Charles Harris, Simon Mathis, Alex Morehead, and Pietro Liò. gRNAde: Geometric Deep Learning for 3D RNA inverse design. *ICML Computational Biology Workshop, 2023.*
->
->[PDF](https://arxiv.org/abs/2305.14749) | [Tweet](https://twitter.com/chaitjo/status/1662118334412800001) | [Slides](https://www.chaitjo.com/publication/joshi-2023-grnade/gRNAde_slides_CASP_RNA_SIG.pdf)
+⚙️ Using gRNAde for custom RNA design scenarios: [Design notebook](/notebooks/design.ipynb)
 
 ![](/tutorial/fig/grnade_pipeline.png)
 
@@ -29,7 +18,7 @@ We have tested gRNAde on Linux with Python 3.10.12 and CUDA 11.8 on NVIDIA A100 
 ```sh
 # Clone gRNAde repository
 cd ~  # change this to your prefered download location
-git clone https://github.com/chaitjo/geometric-rna-design.git
+git clone https://anonymous.4open.science/r/geometric-rna-design
 cd geometric-rna-design
 
 # Install mamba (a faster conda)
@@ -48,16 +37,9 @@ Set up your new python environment, starting with PyTorch and PyG:
 # Install Pytorch on Nvidia GPUs (ensure appropriate CUDA version for your hardware)
 mamba install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
 
-# Install Pytorch on Intel XPUs (specific to Cambridge's Dawn supercomputer)
-module load default-dawn
-source /usr/local/dawn/software/external/intel-oneapi/2024.0/setvars.sh
-export ZE_FLAT_DEVICE_HIERARCHY=COMPOSITE
-python -m pip install torch==2.1.0a0 torchvision==0.16.0a0 torchaudio==2.1.0a0 intel-extension-for-pytorch==2.1.10+xpu --extra-index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/us/
-
 # Install Pytorch Geometric (ensure matching torch + CUDA version to PyTorch)
 pip install torch_geometric
 pip install torch_scatter torch_cluster -f https://data.pyg.org/whl/torch-2.1.2+cu118.html
-# To build PyG libraries from scartch, do not use -f (eg. in case of Intel XPUs)
 ```
 
 Next, install other compulsory dependencies:
@@ -204,16 +186,3 @@ We have provided the splits used in our experiments in the `data/` directory:
 - Multi-state split of structurally flexible RNAs: `data/structsim_split.pt`
 
 The precise procedure for creating the splits (which can be used to modify and customise them) can be found in the `notebooks/` directory.
-
-
-
-## Citation
-
-```
-@article{joshi2023grnade,
-  title={gRNAde: Geometric Deep Learning for 3D RNA inverse design},
-  author={Joshi, Chaitanya K. and Jamasb, Arian R. and Vi{\~n}as, Ramon and Harris, Charles and Mathis, Simon and Morehead, Alex and Li{\`o}, Pietro},
-  journal={arXiv preprint},
-  year={2023},
-}
-```

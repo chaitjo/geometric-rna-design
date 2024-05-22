@@ -3,9 +3,6 @@ method: grid
 name: gRNAde_sweep
 description: "gRNAde W&B sweep template for reproducing benchmark results"
 
-entity: chaitjo
-project: gRNAde
-
 parameters:
   
   # Misc configurations
