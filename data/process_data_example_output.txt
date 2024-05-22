@@ -1,4 +1,4 @@
-Processing raw PDB files from /home/ckj24/rna-inverse-folding/data/
+Processing raw PDB files from /home/ckj24/geometric-rna-design/data/
     100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 14367/14367 [7:04:05<00:00,  1.77s/it]
 
 Clustering at 80% sequence similarity (CD-HIT-EST)
@@ -88,7 +88,7 @@ Clustering at 80% sequence similarity (CD-HIT-EST)
 Clustering at 45% structure similarity (US-align)
     Total CPU time 349.96 m
 
-Saving processed data to /home/ckj24/rna-inverse-folding/data/
+Saving processed data to /home/ckj24/geometric-rna-design/data/
 
 IDs with errors (check manually):
     6OWL_1_C: cannot unpack non-iterable NoneType object  # structures with single/few nucleotides
@@ -96,7 +96,7 @@ IDs with errors (check manually):
     1VQ6_1_4: cannot unpack non-iterable NoneType object
     6RT5_1_E: cannot unpack non-iterable NoneType object
     1EG0_1_M: Coordinates must not be empty               # very coarse structures with only P atoms (poor resolution)
-    5T2C_1_AA: Command '['/home/ckj24/rna-inverse-folding/tools/x3dna-v2.4/bin/find_pair', '/home/ckj24/rna-inverse-folding/data/raw/5T2C_1_AA.pdb']' returned non-zero exit status 1.                               # contains missing atoms, usually very large ribosomal RNAs
+    5T2C_1_AA: Command '['/home/ckj24/geometric-rna-design/tools/x3dna-v2.4/bin/find_pair', '/home/ckj24/geometric-rna-design/data/raw/5T2C_1_AA.pdb']' returned non-zero exit status 1.                               # contains missing atoms, usually very large ribosomal RNAs
     3JCR_1_M: Coordinates must not be empty
     7N33_1_I: cannot unpack non-iterable NoneType object
     2AGN_1_E: Coordinates must not be empty
@@ -129,7 +129,7 @@ IDs with errors (check manually):
     4S2Y_1_B: cannot unpack non-iterable NoneType object
     3J6Y_1_IR: Coordinates must not be empty
     7MW8_1_L: cannot unpack non-iterable NoneType object
-    5UQ8_1_a-x: Command '['/home/ckj24/rna-inverse-folding/tools/x3dna-v2.4/bin/find_pair', '/home/ckj24/rna-inverse-folding/data/raw/5UQ8_1_a-x.pdb']' returned non-zero exit status 1.
+    5UQ8_1_a-x: Command '['/home/ckj24/geometric-rna-design/tools/x3dna-v2.4/bin/find_pair', '/home/ckj24/geometric-rna-design/data/raw/5UQ8_1_a-x.pdb']' returned non-zero exit status 1.
     3PGW_1_N: Coordinates must not be empty
     6YXX_1_AA: "Residue 'N' does not contain an atom named 'C2'"        # low resolution ribosomal RNA with missing atoms
     4AM3_1_I: cannot unpack non-iterable NoneType object
@@ -150,7 +150,7 @@ IDs with errors (check manually):
     1EG0_1_O: Coordinates must not be empty
     3JCR_1_H: Coordinates must not be empty
     6E0O_1_C: cannot unpack non-iterable NoneType object
-    6O8Y_1_A: Command '['/home/ckj24/rna-inverse-folding/tools/x3dna-v2.4/bin/find_pair', '/home/ckj24/rna-inverse-folding/data/raw/6O8Y_1_A.pdb']' returned non-zero exit status 1.
+    6O8Y_1_A: Command '['/home/ckj24/geometric-rna-design/tools/x3dna-v2.4/bin/find_pair', '/home/ckj24/geometric-rna-design/data/raw/6O8Y_1_A.pdb']' returned non-zero exit status 1.
     6L74_1_I: cannot unpack non-iterable NoneType object
     1GSG_1_T: Coordinates must not be empty
     6RT6_1_E: cannot unpack non-iterable NoneType object
@@ -172,7 +172,7 @@ IDs with errors (check manually):
     3CW1_1_w: Coordinates must not be empty
     6YMW_1_C: cannot unpack non-iterable NoneType object
     7MW8_1_M: cannot unpack non-iterable NoneType object
-    5LMT_1_A: Command '['/home/ckj24/rna-inverse-folding/tools/x3dna-v2.4/bin/find_pair', '/home/ckj24/rna-inverse-folding/data/raw/5LMT_1_A.pdb']' returned non-zero exit status 1.
+    5LMT_1_A: Command '['/home/ckj24/geometric-rna-design/tools/x3dna-v2.4/bin/find_pair', '/home/ckj24/geometric-rna-design/data/raw/5LMT_1_A.pdb']' returned non-zero exit status 1.
     3EQ3_1_D: Coordinates must not be empty
     8BVH_1_A: "Residue 'N' does not contain an atom named 'C2'"                         # short RNA, seems unstructured and missing atoms
     3T3O_1_B: cannot unpack non-iterable NoneType object
@@ -182,7 +182,7 @@ IDs with errors (check manually):
     7ORJ_1_P: cannot unpack non-iterable NoneType object
     3DG0_1_A: float division
     1JGP_1_A: float division
-    5UQ7_1_a-x: Command '['/home/ckj24/rna-inverse-folding/tools/x3dna-v2.4/bin/find_pair', '/home/ckj24/rna-inverse-folding/data/raw/5UQ7_1_a-x.pdb']' returned non-zero exit status 1.                                                            # contains missing atoms, usually very large ribosomal RNAs
+    5UQ7_1_a-x: Command '['/home/ckj24/geometric-rna-design/tools/x3dna-v2.4/bin/find_pair', '/home/ckj24/geometric-rna-design/data/raw/5UQ7_1_a-x.pdb']' returned non-zero exit status 1.                                                            # contains missing atoms, usually very large ribosomal RNAs
     6OY5_1_I: cannot unpack non-iterable NoneType object
     6RT5_1_A: cannot unpack non-iterable NoneType object
     6E0O_1_B: cannot unpack non-iterable NoneType object
