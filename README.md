@@ -130,7 +130,6 @@ Detailed usage instructions are available in [the tutorial notebook](/tutorial/t
 ├── configs                         # Configuration files directory
 ├── data                            # Dataset and data files directory
 ├── notebooks                       # Directory for Jupyter notebooks
-├── scripts                         # Directory for standalone scripts
 ├── tutorial                        # Tutorial with example usage
 |
 ├── tools                           # Directory for external tools
@@ -179,7 +178,7 @@ Next, process the raw PDB files into our ML-ready format, which will be saved un
 ```sh
 # Process raw data into ML-ready format (this may take several hours)
 cd ~/geometric-rna-design/
-python scripts/process_data.py
+python data/process_data.py
 ```
 
 Each RNA will be processed into the following format (most of the metadata is optional for simply using gRNAde):
