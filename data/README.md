@@ -16,11 +16,11 @@ rm all_member_pdb_4_0__3_300.zip
 Manual download link: https://rnasolo.cs.put.poznan.pl/archive.
 Select the following for creating the download: 3D (PDB) + all molecules + all members + res. ≤4.0
 
-Next, process the raw PDB files into our ML-ready format, which will be saved under  `data/processed.pt`.
+Next, process the raw PDB files into our ML-ready format, which will be saved under `data/processed.pt`.
 ```sh
 # Process raw data into ML-ready format (this may take several hours)
 cd ~/geometric-rna-design/
-python scripts/process_data.py
+python data/process_data.py
 ```
 
 Each RNA will be processed into the following format (most of the metadata is optional for simply using gRNAde):
