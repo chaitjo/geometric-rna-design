@@ -1,6 +1,6 @@
 # 💣 gRNAde: Geometric Deep Learning for 3D RNA Inverse Design
 
-**gRNAde** is a **g**eometric deep learning pipeline for 3D **RNA** inverse **de**sign, analogous to [ProteinMPNN](https://github.com/dauparas/ProteinMPNN) for protein design. 
+**gRNAde** is a **g**eometric deep learning pipeline for 3D **RNA** inverse **de**sign. 
 
 🧬 Tutorial notebook to get started: [gRNAde 101](https://anonymous.4open.science/r/geometric-rna-design/tutorial/tutorial.ipynb)
 
