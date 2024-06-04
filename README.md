@@ -48,20 +48,27 @@ Set up your new python environment, starting with PyTorch and PyG:
 # Install Pytorch on Nvidia GPUs (ensure appropriate CUDA version for your hardware)
 mamba install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
 
-# Install Pytorch on Intel XPUs (specific to Cambridge's Dawn supercomputer)
+# Install Pytorch Geometric (ensure matching torch + CUDA version to PyTorch)
+pip install torch_geometric
+pip install torch_scatter torch_cluster -f https://data.pyg.org/whl/torch-2.1.2+cu118.html
+```
+<details>
+<summary>Install Pytorch/PyG on Intel XPUs (specific to Cambridge's Dawn supercomputer)</summary>
+
+```sh
 module load default-dawn
 source /usr/local/dawn/software/external/intel-oneapi/2024.0/setvars.sh
 export ZE_FLAT_DEVICE_HIERARCHY=COMPOSITE
 python -m pip install torch==2.1.0a0 torchvision==0.16.0a0 torchaudio==2.1.0a0 intel-extension-for-pytorch==2.1.10+xpu --extra-index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/us/
-
-# Install Pytorch Geometric (ensure matching torch + CUDA version to PyTorch)
-pip install torch_geometric
-pip install torch_scatter torch_cluster -f https://data.pyg.org/whl/torch-2.1.2+cu118.html
-# To build PyG libraries from scartch, do not use -f (eg. in case of Intel XPUs)
+pip install torch_scatter torch_cluster
 ```
+
+</details>
+<br>
 
 Next, install other compulsory dependencies:
 ```sh
+# Install other python libraries
 mamba install jupyterlab matplotlib seaborn pandas biopython biotite -c conda-forge
 pip install wandb gdown pyyaml ipdb python-dotenv tqdm cpdb-protein torchmetrics einops ml_collections mdanalysis MDAnalysisTests draw_rna
 
@@ -84,7 +91,9 @@ cd ~/geometric-rna-design/tools/rhofold/
 gdown https://drive.google.com/uc?id=1To2bjbhQLFx1k8hBOW5q1JFq6ut27XEv
 ```
 
-Optionally, you can also set up the following extra tools and dependencies:
+<details>
+<summary>Optionally, you can also set up some extra tools and dependencies.</summary>
+
 ```sh
 # (Optional) Install CD-HIT for sequence identity clustering
 mamba install cd-hit -c bioconda
@@ -95,6 +104,9 @@ git clone https://github.com/pylelab/USalign.git && cd USalign/ && git checkout 
 g++ -static -O3 -ffast-math -lm -o USalign USalign.cpp
 g++ -static -O3 -ffast-math -lm -o qTMclust qTMclust.cpp
 ```
+
+</details>
+<br>
 
 Once your python environment is set up, create your `.env` file with the appropriate environment variables; see the .env.example file included in the codebase for reference. 
 ```sh
@@ -159,11 +171,12 @@ If you would like to train your own models from scratch, download and extract th
 🚨 **Note:** Alternatively to the instructions below, you can download a pre-processed [`.pt`](https://drive.google.com/file/d/1gcUUaRxbGZnGMkLdtVwAILWVerVCbu4Y/view?usp=sharing) file and [`.csv`](https://drive.google.com/file/d/1lbdiE1LfWPReo5VnZy0zblvhVl5QhaF4/view?usp=sharing) metadata, and place them into the `data/` directory.
 
 **Method 1: Script**
+
 ```sh
 # Download structures in PDB format from RNAsolo (31 October 2023 cutoff)
 mkdir ~/geometric-rna-design/data/raw
 cd ~/geometric-rna-design/data/raw
-gdown https://drive.google.com/uc?id=TODO
+gdown https://drive.google.com/uc?id=10NidhkkJ-rkbqDwBGA_GaXs9enEBJ7iQ
 tar -zxvf RNAsolo_31102023.tar.gz
 ```
 <details>
@@ -177,13 +190,15 @@ rm all_member_pdb_4_0__3_300.zip
 
 </details>
 
-> RNAsolo recently stopped hosting downloads for older versions, such as the 31 October 2023 cutoff that we used in our current work, so you can download the exact data we used via our [Google Drive link](TODO).
+> RNAsolo recently stopped hosting downloads for older versions, such as the 31 October 2023 cutoff that we used in our current work, so you can download the exact data we used via our [Google Drive link](https://drive.google.com/file/d/10NidhkkJ-rkbqDwBGA_GaXs9enEBJ7iQ/).
 
 **Method 2: Manual**
+
 Manual download link: https://rnasolo.cs.put.poznan.pl/archive.
 Select the following for creating the download: 3D (PDB) + all molecules + all members + res. ≤4.0
 
-Next, process the raw PDB files into our ML-ready format, which will be saved under `data/processed.pt`.
+Next, process the raw PDB files into our ML-ready format, which will be saved under `data/processed.pt`. 
+You need to install the optional dependencies (US-align, CD-HIT) for processing.
 ```sh
 # Process raw data into ML-ready format (this may take several hours)
 cd ~/geometric-rna-design/
