@@ -63,7 +63,7 @@ pip install torch_scatter torch_cluster -f https://data.pyg.org/whl/torch-2.1.2+
 Next, install other compulsory dependencies:
 ```sh
 mamba install jupyterlab matplotlib seaborn pandas biopython biotite -c conda-forge
-pip install wandb gdown pyyaml ipdb python-dotenv tqdm cpdb-protein torchmetrics einops ml_collections mdanalysis MDAnalysisTests
+pip install wandb gdown pyyaml ipdb python-dotenv tqdm cpdb-protein torchmetrics einops ml_collections mdanalysis MDAnalysisTests draw_rna
 
 # Install X3DNA for secondary structure determination
 cd ~/geometric-rna-design/tools/
@@ -94,11 +94,6 @@ cd ~/geometric-rna-design/tools/
 git clone https://github.com/pylelab/USalign.git && cd USalign/ && git checkout 97325d3aad852f8a4407649f25e697bbaa17e186
 g++ -static -O3 -ffast-math -lm -o USalign USalign.cpp
 g++ -static -O3 -ffast-math -lm -o qTMclust qTMclust.cpp
-
-# (Optional) Install draw_rna for visualisation
-cd ~/geometric-rna-design/tools/
-git clone --depth=1 https://github.com/DasLab/draw_rna && cd draw_rna
-python setup.py install
 ```
 
 Once your python environment is set up, create your `.env` file with the appropriate environment variables; see the .env.example file included in the codebase for reference. 
