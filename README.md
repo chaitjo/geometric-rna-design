@@ -220,7 +220,7 @@ The precise procedure for creating the splits (which can be used to modify and c
 ```
 @article{joshi2023grnade,
   title={gRNAde: Geometric Deep Learning for 3D RNA inverse design},
-  author={Joshi, Chaitanya K. and Jamasb, Arian R. and Vi{\~n}as, Ramon and Harris, Charles and Mathis, Simon and Morehead, Alex and Li{\`o}, Pietro},
+  author={Joshi, Chaitanya K. and Jamasb, Arian R. and Vi{\~n}as, Ramon and Harris, Charles and Mathis, Simon and Morehead, Alex and Anand, Rishabh and Li{\`o}, Pietro},
   journal={arXiv preprint},
   year={2023},
 }
