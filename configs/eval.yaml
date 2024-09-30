@@ -1,4 +1,4 @@
-# Default training config to be used with main.py
+# Example evaluation config to be used with main.py
 
 # Misc configurations
 device:
@@ -46,7 +46,7 @@ max_nodes_sample:
 # Splitting configurations
 split:
   value: 'das'
-  desc: Type of data split (das/structsim/seqid)
+  desc: Type of data split (structsim/seqid)
 
 # Model configurations
 model:
@@ -74,7 +74,7 @@ out_dim:
   value: 4
   desc: Output dimension (4 bases for RNA)
 
-# Training configurations
+# Training configurations (unused)
 epochs:
   value: 50
   desc: Number of training epochs
@@ -96,10 +96,10 @@ val_every:
 
 # Evaluation configurations
 model_path:
-  value: ''
+  value: 'checkpoints/gRNAde_ARv1_1state_das.h5'
   desc: Path to model checkpoint for evaluation or reloading
 evaluate:
-  value: False
+  value: True
   desc: Whether to run evaluation (or training)
 n_samples:
   value: 16
