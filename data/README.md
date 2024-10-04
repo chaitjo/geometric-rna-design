@@ -61,6 +61,6 @@ Each RNA will be processed into the following format (most of the metadata is op
 
 We have provided the splits used in our experiments in the `data/` directory:
 - Single-state split from [Das et al., 2010](https://www.nature.com/articles/nmeth.1433): `data/das_split.pt` (called the Das split for compatibility with older code)
-- Multi-state split of structurally flexible RNAs: `data/structsim_split.pt`
+- Multi-state split of structurally flexible RNAs: `data/structsim_split_v2.pt` (Note that we have deprecated an older version of the multi-state split)
 
 The precise procedure for creating the splits (which can be used to modify and customise them) can be found in the `notebooks/` directory. The exact PDB IDs used for each of the splits are also available in the `data/split_ids/` directory, in case you are using a different version of RNAsolo after the 31 October 2023 cutoff.
