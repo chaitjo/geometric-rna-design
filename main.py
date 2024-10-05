@@ -51,9 +51,7 @@ def main(config, device):
         test_loader = get_dataloader(config, testset, shuffle=False)
 
         # Run evaluator + save designed structures
-        df, samples_list, recovery_list, perplexity_list, \
-        scscore_list, scscore_ribonanza_list, \
-        scscore_rmsd_list, scscore_tm_list, scscore_gdt_list = evaluate(
+        results = evaluate(
             model, 
             test_loader.dataset, 
             config.n_samples, 
@@ -61,8 +59,14 @@ def main(config, device):
             device, 
             model_name="test",
             metrics=['recovery', 'perplexity', 'sc_score_eternafold', 'sc_score_ribonanzanet', 'sc_score_rhofold'],
-            save_structures=True
+            save_designs=True
         )
+        df, samples_list, recovery_list, perplexity_list, \
+        scscore_list, scscore_ribonanza_list, \
+        scscore_rmsd_list, scscore_tm_list, scscore_gdt_list, \
+        rmsd_within_thresh, tm_within_thresh, gdt_within_thresh = results.values()
+        # Save results
+        torch.save(results, os.path.join(wandb.run.dir, f"test_results.pt"))
         # Update wandb summary metrics
         wandb.run.summary[f"best_test_recovery"] = np.mean(recovery_list)
         wandb.run.summary[f"best_test_perplexity"] = np.mean(perplexity_list)
@@ -71,20 +75,19 @@ def main(config, device):
         wandb.run.summary[f"best_test_scscore_rmsd"] = np.mean(scscore_rmsd_list)
         wandb.run.summary[f"best_test_scscore_tm"] = np.mean(scscore_tm_list)
         wandb.run.summary[f"best_test_scscore_gdt"] = np.mean(scscore_gdt_list)
+        wandb.run.summary[f"best_test_rmsd_within_thresh"] = np.mean(rmsd_within_thresh)
+        wandb.run.summary[f"best_test_tm_within_thresh"] = np.mean(tm_within_thresh)
+        wandb.run.summary[f"best_test_gdt_within_thresh"] = np.mean(gdt_within_thresh)
         print(f"BEST test recovery: {np.mean(recovery_list):.4f}\
                 perplexity: {np.mean(perplexity_list):.4f}\
                 scscore: {np.mean(scscore_list):.4f}\
                 scscore_ribonanza: {np.mean(scscore_ribonanza_list):.4f}\
                 scscore_rmsd: {np.mean(scscore_rmsd_list):.4f}\
                 scscore_tm: {np.mean(scscore_tm_list):.4f}\
-                scscore_gdt: {np.mean(scscore_gdt_list):.4f}")
-        # Save results
-        torch.save(
-                (df, samples_list, recovery_list, perplexity_list, 
-                 scscore_list, scscore_ribonanza_list, 
-                 scscore_rmsd_list, scscore_tm_list, scscore_gdt_list),
-                os.path.join(wandb.run.dir, f"test_results.pt")
-            )
+                scscore_gdt: {np.mean(scscore_gdt_list):.4f}\
+                rmsd_within_thresh: {np.mean(rmsd_within_thresh):.4f}\
+                tm_within_thresh: {np.mean(tm_within_thresh):.4f}\
+                gdt_within_thresh: {np.mean(gdt_within_thresh):.4f}")
 
     else:
         # Get train, val, test data samples as lists
@@ -104,7 +107,7 @@ def main(config, device):
         train(config, model, train_loader, val_loader, test_loader, device)
 
 
-def get_data_splits(config, split_type="structsim"):
+def get_data_splits(config, split_type="structsim_v2"):
     """
     Returns train, val, test data splits as lists.
     """

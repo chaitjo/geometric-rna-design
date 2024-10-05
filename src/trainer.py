@@ -108,9 +108,7 @@ def train(
         
         for loader, set_name in [(test_loader, "test"), (val_loader, "val")]:
             # Run evaluator
-            df, samples_list, recovery_list, perplexity_list, \
-            scscore_list, scscore_ribonanza_list, \
-            scscore_rmsd_list, scscore_tm_list, scscore_gdt_list = evaluate(
+            results = evaluate(
                 model, 
                 loader.dataset, 
                 config.n_samples, 
@@ -118,8 +116,14 @@ def train(
                 device, 
                 model_name=set_name,
                 metrics=['recovery', 'perplexity', 'sc_score_eternafold', 'sc_score_ribonanzanet', 'sc_score_rhofold'],
-                save_structures=True
+                save_designs=True
             )
+            df, samples_list, recovery_list, perplexity_list, \
+            scscore_list, scscore_ribonanza_list, \
+            scscore_rmsd_list, scscore_tm_list, scscore_gdt_list, \
+            rmsd_within_thresh, tm_within_thresh, gdt_within_thresh = results.values()
+            # Save results
+            torch.save(results, os.path.join(wandb.run.dir, f"{set_name}_results.pt"))
             # Update wandb summary metrics
             wandb.run.summary[f"best_{set_name}_recovery"] = np.mean(recovery_list)
             wandb.run.summary[f"best_{set_name}_perplexity"] = np.mean(perplexity_list)
@@ -128,20 +132,19 @@ def train(
             wandb.run.summary[f"best_{set_name}_scscore_rmsd"] = np.mean(scscore_rmsd_list)
             wandb.run.summary[f"best_{set_name}_scscore_tm"] = np.mean(scscore_tm_list)
             wandb.run.summary[f"best_{set_name}_scscore_gdt"] = np.mean(scscore_gdt_list)
+            wandb.run.summary[f"best_{set_name}_rmsd_within_thresh"] = np.mean(rmsd_within_thresh)
+            wandb.run.summary[f"best_{set_name}_tm_within_thresh"] = np.mean(tm_within_thresh)
+            wandb.run.summary[f"best_{set_name}_gdt_within_thresh"] = np.mean(gdt_within_thresh)
             print(f"BEST {set_name} recovery: {np.mean(recovery_list):.4f}\
                     perplexity: {np.mean(perplexity_list):.4f}\
                     scscore: {np.mean(scscore_list):.4f}\
                     scscore_ribonanza: {np.mean(scscore_ribonanza_list):.4f}\
                     scscore_rmsd: {np.mean(scscore_rmsd_list):.4f}\
                     scscore_tm: {np.mean(scscore_tm_list):.4f}\
-                    scscore_gdt: {np.mean(scscore_gdt_list):.4f}") 
-            # Save results
-            torch.save(
-                (df, samples_list, recovery_list, perplexity_list,
-                 scscore_list, scscore_ribonanza_list, 
-                 scscore_rmsd_list, scscore_tm_list, scscore_gdt_list),
-                os.path.join(wandb.run.dir, f"{set_name}_results.pt")
-            )
+                    scscore_gdt: {np.mean(scscore_gdt_list):.4f}\
+                    rmsd_within_thresh: {np.mean(rmsd_within_thresh):.4f}\
+                    tm_within_thresh: {np.mean(tm_within_thresh):.4f}\
+                    gdt_within_thresh: {np.mean(gdt_within_thresh):.4f}")
 
 
 def loop(model, dataloader, loss_fn, optimizer=None, device='cpu'):

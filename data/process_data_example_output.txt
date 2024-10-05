@@ -1,0 +1,189 @@
+Processing raw PDB files from /home/ckj24/geometric-rna-design/data/
+    100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 14367/14367 [7:04:05<00:00,  1.77s/it]
+
+Clustering at 80% sequence similarity (CD-HIT-EST)
+    ================================================================
+    Program: CD-HIT, V4.8.1 (+OpenMP), May 15 2023, 22:49:31
+    Command: cd-hit-est -i input -o output -c 0.8 -n 4 -M 0 -T 0
+    Started: Mon Nov  6 04:14:31 2023
+    ================================================================
+    Output
+    ----------------------------------------------------------------
+    total number of CPUs in the system is 16
+    Actual number of CPUs to be used: 16
+    total seq: 4230
+    longest and shortest : 4455 and 11
+    Total letters: 2892529
+    Sequences have been sorted
+    Approximated minimal memory consumption:
+    Sequence        : 3M
+    Buffer          : 16 X 18M = 296M
+    Table           : 2 X 0M = 0M
+    Miscellaneous   : 0M
+    Total           : 300M
+    Table limit with the given memory limit:
+    Max number of representatives: 625000
+    Max number of word counting entries: 222926171
+    # comparing sequences from          0  to        235
+    ---------- new table with       62 representatives
+    # comparing sequences from        235  to        456
+    99.9%---------- new table with       18 representatives
+    # comparing sequences from        456  to        665
+    ..................---------- new table with       68 representatives
+    # comparing sequences from        665  to        863
+    94.7%---------- new table with       38 representatives
+    # comparing sequences from        863  to       1050
+    88.2%---------- new table with       13 representatives
+    # comparing sequences from       1050  to       1226
+    ............---------- new table with       56 representatives
+    # comparing sequences from       1226  to       1392
+    98.5%---------- new table with       59 representatives
+    # comparing sequences from       1392  to       1549
+    83.2%---------- new table with       60 representatives
+    # comparing sequences from       1549  to       1697
+    95.0%---------- new table with       48 representatives
+    # comparing sequences from       1697  to       1837
+    82.4%---------- new table with       51 representatives
+    # comparing sequences from       1837  to       1969
+    82.6%---------- new table with       41 representatives
+    # comparing sequences from       1969  to       2094
+    83.1%---------- new table with       41 representatives
+    # comparing sequences from       2094  to       2212
+    83.1%---------- new table with       30 representatives
+    # comparing sequences from       2212  to       2324
+    82.3%---------- new table with       24 representatives
+    # comparing sequences from       2324  to       2429
+    84.4%---------- new table with       20 representatives
+    # comparing sequences from       2429  to       2529
+    95.0%---------- new table with       19 representatives
+    # comparing sequences from       2529  to       2623
+    .............---------- new table with       30 representatives
+    # comparing sequences from       2623  to       2712
+    82.1%---------- new table with       31 representatives
+    # comparing sequences from       2712  to       2796
+    ..............---------- new table with       47 representatives
+    # comparing sequences from       2796  to       2875
+    ..................---------- new table with       35 representatives
+    # comparing sequences from       2875  to       2950
+    ..........---------- new table with       29 representatives
+    # comparing sequences from       2950  to       3021
+    82.1%---------- new table with       17 representatives
+    # comparing sequences from       3021  to       3088
+    ...........---------- new table with       33 representatives
+    # comparing sequences from       3088  to       3151
+    82.2%---------- new table with       12 representatives
+    # comparing sequences from       3151  to       3210
+    .........---------- new table with       19 representatives
+    # comparing sequences from       3210  to       3266
+    .....---------- new table with        9 representatives
+    # comparing sequences from       3266  to       4230
+    .---------- new table with       30 representatives
+    4230  finished        940  clusters
+    Approximated maximum memory consumption: 300M
+    writing new database
+    writing clustering information
+    program completed !
+    Total CPU time 70.68
+
+Clustering at 45% structure similarity (US-align)
+    Total CPU time 349.96 m
+
+Saving processed data to /home/ckj24/geometric-rna-design/data/
+
+IDs with errors (check manually):
+    6OWL_1_C: cannot unpack non-iterable NoneType object  # structures with single/few nucleotides
+    4JZV_1_C: cannot unpack non-iterable NoneType object
+    1VQ6_1_4: cannot unpack non-iterable NoneType object
+    6RT5_1_E: cannot unpack non-iterable NoneType object
+    1EG0_1_M: Coordinates must not be empty               # very coarse structures with only P atoms (poor resolution)
+    5T2C_1_AA: Command '['/home/ckj24/geometric-rna-design/tools/x3dna-v2.4/bin/find_pair', '/home/ckj24/geometric-rna-design/data/raw/5T2C_1_AA.pdb']' returned non-zero exit status 1.                               # contains missing atoms, usually very large ribosomal RNAs
+    3JCR_1_M: Coordinates must not be empty
+    7N33_1_I: cannot unpack non-iterable NoneType object
+    2AGN_1_E: Coordinates must not be empty
+    6RT4_1_C: cannot unpack non-iterable NoneType object
+    2IY3_1_B: Coordinates must not be empty
+    3J6X_1_IR: Coordinates must not be empty
+    7N33_1_G: cannot unpack non-iterable NoneType object
+    6RT7_1_A: cannot unpack non-iterable NoneType object
+    1R2X_1_C: Coordinates must not be empty
+    7MW8_1_N: cannot unpack non-iterable NoneType object
+    6O75_1_D: cannot unpack non-iterable NoneType object
+    6O75_1_C: cannot unpack non-iterable NoneType object
+    1EG0_1_L: Coordinates must not be empty
+    1QZA_1_B: Coordinates must not be empty
+    1LS2_1_B: Coordinates must not be empty
+    7P8Q_1_B: cannot unpack non-iterable NoneType object
+    3CW1_1_V: Coordinates must not be empty
+    6OWL_1_B: cannot unpack non-iterable NoneType object
+    6RT6_1_A: cannot unpack non-iterable NoneType object
+    4BBL_1_Z: Coordinates must not be empty
+    7MW8_1_O: cannot unpack non-iterable NoneType object
+    1MVR_1_1: Coordinates must not be empty
+    4AM3_1_D: cannot unpack non-iterable NoneType object
+    4V48_1_A9: Coordinates must not be empty
+    4V47_1_A9: Coordinates must not be empty
+    3EQ4_1_D: Coordinates must not be empty
+    3PF5_1_S: cannot unpack non-iterable NoneType object
+    4V47_1_A0: float division                                           # low resolution ribosomal RNA with missing atoms
+    7N33_1_H: cannot unpack non-iterable NoneType object
+    4S2Y_1_B: cannot unpack non-iterable NoneType object
+    3J6Y_1_IR: Coordinates must not be empty
+    7MW8_1_L: cannot unpack non-iterable NoneType object
+    5UQ8_1_a-x: Command '['/home/ckj24/geometric-rna-design/tools/x3dna-v2.4/bin/find_pair', '/home/ckj24/geometric-rna-design/data/raw/5UQ8_1_a-x.pdb']' returned non-zero exit status 1.
+    3PGW_1_N: Coordinates must not be empty
+    6YXX_1_AA: "Residue 'N' does not contain an atom named 'C2'"        # low resolution ribosomal RNA with missing atoms
+    4AM3_1_I: cannot unpack non-iterable NoneType object
+    7MW8_1_K: cannot unpack non-iterable NoneType object
+    3CW1_1_v: Coordinates must not be empty
+    3DG5_1_A: float division                                            # low resolution ribosomal RNA with missing atoms       
+    7ORK_1_P: cannot unpack non-iterable NoneType object
+    3CW1_1_x: Coordinates must not be empty
+    4V42_1_BB: Coordinates must not be empty
+    1JGQ_1_A: float division
+    3P6Y_1_W: cannot unpack non-iterable NoneType object
+    3PGW_1_R: Coordinates must not be empty
+    7N33_1_K: cannot unpack non-iterable NoneType object
+    1B2M_1_E: cannot unpack non-iterable NoneType object
+    7N33_1_L: cannot unpack non-iterable NoneType object
+    1R2W_1_C: Coordinates must not be empty
+    4JZU_1_C: cannot unpack non-iterable NoneType object
+    1EG0_1_O: Coordinates must not be empty
+    3JCR_1_H: Coordinates must not be empty
+    6E0O_1_C: cannot unpack non-iterable NoneType object
+    6O8Y_1_A: Command '['/home/ckj24/geometric-rna-design/tools/x3dna-v2.4/bin/find_pair', '/home/ckj24/geometric-rna-design/data/raw/6O8Y_1_A.pdb']' returned non-zero exit status 1.
+    6L74_1_I: cannot unpack non-iterable NoneType object
+    1GSG_1_T: Coordinates must not be empty
+    6RT6_1_E: cannot unpack non-iterable NoneType object
+    1E8S_1_C: Coordinates must not be empty
+    4BBL_1_Y: Coordinates must not be empty
+    1Y1Y_1_P: Coordinates must not be empty
+    1B2M_1_D: cannot unpack non-iterable NoneType object
+    6IS0_1_C: cannot unpack non-iterable NoneType object
+    6S0M_1_C: cannot unpack non-iterable NoneType object
+    1B2M_1_C: cannot unpack non-iterable NoneType object
+    7N33_1_J: cannot unpack non-iterable NoneType object
+    4V42_1_AA: float division
+    5ZZM_1_M: Coordinates must not be empty
+    7UCR_1_A: "Residue 'U' does not contain an atom named 'DO2''"                       # TODO
+    2RDO_1_A: Coordinates must not be empty
+    6YXY_1_AA: "Residue 'N' does not contain an atom named 'C2'"                        # low resolution ribosomal RNA with missing atoms
+    6TY9_1_M: cannot unpack non-iterable NoneType object
+    4AM3_1_H: cannot unpack non-iterable NoneType object
+    3CW1_1_w: Coordinates must not be empty
+    6YMW_1_C: cannot unpack non-iterable NoneType object
+    7MW8_1_M: cannot unpack non-iterable NoneType object
+    5LMT_1_A: Command '['/home/ckj24/geometric-rna-design/tools/x3dna-v2.4/bin/find_pair', '/home/ckj24/geometric-rna-design/data/raw/5LMT_1_A.pdb']' returned non-zero exit status 1.
+    3EQ3_1_D: Coordinates must not be empty
+    8BVH_1_A: "Residue 'N' does not contain an atom named 'C2'"                         # short RNA, seems unstructured and missing atoms
+    3T3O_1_B: cannot unpack non-iterable NoneType object
+    3EP2_1_D: Coordinates must not be empty
+    1QZB_1_B: Coordinates must not be empty
+    3DG4_1_A: float division
+    7ORJ_1_P: cannot unpack non-iterable NoneType object
+    3DG0_1_A: float division
+    1JGP_1_A: float division
+    5UQ7_1_a-x: Command '['/home/ckj24/geometric-rna-design/tools/x3dna-v2.4/bin/find_pair', '/home/ckj24/geometric-rna-design/data/raw/5UQ7_1_a-x.pdb']' returned non-zero exit status 1.                                                            # contains missing atoms, usually very large ribosomal RNAs
+    6OY5_1_I: cannot unpack non-iterable NoneType object
+    6RT5_1_A: cannot unpack non-iterable NoneType object
+    6E0O_1_B: cannot unpack non-iterable NoneType object
+    3JCR_1_N: Coordinates must not be empty                                            # short RNA, seems unstructured and missing atoms

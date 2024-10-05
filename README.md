@@ -44,8 +44,9 @@ pip install torch_scatter torch_cluster -f https://data.pyg.org/whl/torch-2.1.2+
 
 Next, install other compulsory dependencies:
 ```sh
+# Install other python libraries
 mamba install jupyterlab matplotlib seaborn pandas biopython biotite -c conda-forge
-pip install wandb gdown pyyaml ipdb python-dotenv tqdm cpdb-protein torchmetrics einops ml_collections mdanalysis MDAnalysisTests
+pip install wandb gdown pyyaml ipdb python-dotenv tqdm cpdb-protein torchmetrics einops ml_collections mdanalysis MDAnalysisTests draw_rna arnie
 
 # Install X3DNA for secondary structure determination
 cd ~/geometric-rna-design/tools/
@@ -66,7 +67,9 @@ cd ~/geometric-rna-design/tools/rhofold/
 gdown https://drive.google.com/uc?id=1To2bjbhQLFx1k8hBOW5q1JFq6ut27XEv
 ```
 
-Optionally, you can also set up the following extra tools and dependencies:
+<details>
+<summary>Optionally, you can also set up some extra tools and dependencies.</summary>
+
 ```sh
 # (Optional) Install CD-HIT for sequence identity clustering
 mamba install cd-hit -c bioconda
@@ -77,11 +80,17 @@ git clone https://github.com/pylelab/USalign.git && cd USalign/ && git checkout 
 g++ -static -O3 -ffast-math -lm -o USalign USalign.cpp
 g++ -static -O3 -ffast-math -lm -o qTMclust qTMclust.cpp
 
-# (Optional) Install draw_rna for visualisation
+# (Optional) Install ViennaRNA, mainly used for plotting in design notebook
 cd ~/geometric-rna-design/tools/
-git clone --depth=1 https://github.com/DasLab/draw_rna && cd draw_rna
-python setup.py install
+tar -zxvf ViennaRNA-2.6.4.tar.gz
+cd ViennaRNA-2.6.4
+./configure  # ./configure --enable-macosx-installer
+make
+sudo make install
 ```
+
+</details>
+<br>
 
 Once your python environment is set up, create your `.env` file with the appropriate environment variables; see the .env.example file included in the codebase for reference. 
 ```sh
@@ -112,7 +121,6 @@ Detailed usage instructions are available in [the tutorial notebook](/tutorial/t
 ├── configs                         # Configuration files directory
 ├── data                            # Dataset and data files directory
 ├── notebooks                       # Directory for Jupyter notebooks
-├── scripts                         # Directory for standalone scripts
 ├── tutorial                        # Tutorial with example usage
 |
 ├── tools                           # Directory for external tools
@@ -139,29 +147,32 @@ Detailed usage instructions are available in [the tutorial notebook](/tutorial/t
 
 
 
-## Downloading Data
+## Downloading and Preparing Data
 
 gRNAde is trained on all RNA structures from the PDB at ≤4A resolution (12K 3D structures from 4.2K unique RNAs) downloaded via [RNASolo](https://rnasolo.cs.put.poznan.pl) with date cutoff: 31 October 2023.
 If you would like to train your own models from scratch, download and extract the raw `.pdb` files via the following script into the `data/raw/` directory (or another location indicated by the `DATA_PATH` environment variable in your `.env` file).
 
-> ❗️ Alternatively to the instructions below, you can download a pre-processed [`.pt`](https://drive.google.com/file/d/1gcUUaRxbGZnGMkLdtVwAILWVerVCbu4Y/view?usp=sharing) file and [`.csv`](https://drive.google.com/file/d/1lbdiE1LfWPReo5VnZy0zblvhVl5QhaF4/view?usp=sharing) metadata, and place them into the `data/` directory.
+**Method 1: Script**
 
 ```sh
-# Download structures in pdb format
+# Download structures in PDB format from RNAsolo (31 October 2023 cutoff)
 mkdir ~/geometric-rna-design/data/raw
 cd ~/geometric-rna-design/data/raw
-curl -O https://rnasolo.cs.put.poznan.pl/media/files/zipped/bunches/pdb/all_member_pdb_4_0__3_300.zip
-unzip all_member_pdb_4_0__3_300.zip
-rm all_member_pdb_4_0__3_300.zip
+gdown https://drive.google.com/uc?id=10NidhkkJ-rkbqDwBGA_GaXs9enEBJ7iQ
+tar -zxvf RNAsolo_31102023.tar.gz
 ```
+
+**Method 2: Manual**
+
 Manual download link: https://rnasolo.cs.put.poznan.pl/archive.
 Select the following for creating the download: 3D (PDB) + all molecules + all members + res. ≤4.0
 
-Next, process the raw PDB files into our ML-ready format, which will be saved under `data/processed.pt`.
+Next, process the raw PDB files into our ML-ready format, which will be saved under `data/processed.pt`. 
+You need to install the optional dependencies (US-align, CD-HIT) for processing.
 ```sh
 # Process raw data into ML-ready format (this may take several hours)
 cd ~/geometric-rna-design/
-python scripts/process_data.py
+python data/process_data.py
 ```
 
 Each RNA will be processed into the following format (most of the metadata is optional for simply using gRNAde):
@@ -181,8 +192,10 @@ Each RNA will be processed into the following format (most of the metadata is op
 }
 ```
 
+## Splits for Benchmarking
+
 We have provided the splits used in our experiments in the `data/` directory:
 - Single-state split from [Das et al., 2010](https://www.nature.com/articles/nmeth.1433): `data/das_split.pt` (called the Das split for compatibility with older code)
-- Multi-state split of structurally flexible RNAs: `data/structsim_split.pt`
+- Multi-state split of structurally flexible RNAs: `data/structsim_split_v2.pt`
 
-The precise procedure for creating the splits (which can be used to modify and customise them) can be found in the `notebooks/` directory.
+The precise procedure for creating the splits (which can be used to modify and customise them) can be found in the `notebooks/` directory. The exact PDB IDs used for each of the splits are also available in the `data/split_ids/` directory, in case you are using a different version of RNAsolo after the 31 October 2023 cutoff.
