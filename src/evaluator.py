@@ -25,7 +25,13 @@ from src.data.sec_struct_utils import (
     dotbracket_to_paired,
     dotbracket_to_adjacency
 )
-from src.constants import NUM_TO_LETTER, PROJECT_PATH
+from src.constants import (
+    NUM_TO_LETTER, 
+    PROJECT_PATH,
+    RMSD_THRESHOLD,
+    TM_THRESHOLD,
+    GDT_THRESHOLD
+)
 
 
 def evaluate(
@@ -39,7 +45,7 @@ def evaluate(
             'recovery', 'perplexity', 'sc_score_eternafold', 
             'sc_score_ribonanzanet', 'sc_score_rhofold'
         ],
-        save_structures=False
+        save_designs=False
     ):
     """
     Run evaluation suite for trained RNA inverse folding model on a dataset.
@@ -56,6 +62,9 @@ def evaluate(
     5. (sc_score_rhofold) Tertiary structure self-consistency scores per sample,
         using RhoFold for tertiary structure prediction and measuring RMSD, TM-score,
         and GDT_TS between the predicted and groundtruth C4' 3D coordinates.
+    6. (rmsd_within_thresh) Percentage of samples with RMSD within threshold (<=2.0A)
+    7. (tm_within_thresh) Percentage of samples with TM-score within threshold (>=0.45)
+    8. (gddt_within_thresh) Percentage of samples with GDT_TS within threshold (>=0.50)
 
     Args:
         model: trained RNA inverse folding model
@@ -65,9 +74,9 @@ def evaluate(
         device: device to run evaluation on
         model_name: name of model/dataset for plotting (default: 'eval')
         metrics: list of metrics to compute
-        save_structures: whether to save designed structures (forward folded with RhoFold)
+        save_designs: whether to save designs as fasta with metrics
     
-    Returns:
+    Returns: Dictionary with the following keys:
         df: DataFrame with metrics and metadata per residue per sample for analysis and plotting
         samples_list: list of tensors of shape (n_samples, seq_len) per data point 
         recovery_list: list of mean recovery per data point
@@ -77,6 +86,9 @@ def evaluate(
         sc_score_rmsd_list: list of 3D self-consistency RMSDs per data point
         sc_score_tm_list: list of 3D self-consistency TM-scores per data point
         sc_score_gddt_list: list of 3D self-consistency GDTs per data point
+        rmsd_within_thresh_list: list of % scRMSDs within threshold per data point
+        tm_within_thresh_list: list of % scTMs within threshold per data point
+        gddt_within_thresh_list: list of % scGDDTs within threshold per data point
     """
     assert 'recovery' in metrics, 'Sequence recovery must be computed for evaluation'
 
@@ -122,8 +134,11 @@ def evaluate(
     sc_score_ribonanzanet_list = [] # list of 1D self-consistency scores per data point
     sc_score_eternafold_list = []   # list of 2D self-consistency scores per data point
     sc_score_rmsd_list = []         # list of 3D self-consistency RMSDs per data point
+    rmsd_within_thresh_list = []    # list of % scRMSDs within threshold per data point
     sc_score_tm_list = []           # list of 3D self-consistency TM-scores per data point
+    tm_within_thresh_list = []      # list of % scTMs within threshold per data point
     sc_score_gddt_list = []         # list of 3D self-consistency GDTs per data point
+    gddt_within_thresh_list = []    # list of % scGDDTs within threshold per data point
 
     # DataFrame to store metrics and metadata per residue per sample for analysis and plotting
     df = pd.DataFrame(columns=['idx', 'recovery', 'sasa', 'paired', 'rmsds', 'model_name'])
@@ -240,13 +255,17 @@ def evaluate(
                     mask_coords,
                     rhofold,
                     output_dir,
-                    save_structures = save_structures
+                    save_designs = save_designs
                 )
                 sc_score_rmsd_list.append(sc_score_rmsd.mean())
                 sc_score_tm_list.append(sc_score_tm.mean())
                 sc_score_gddt_list.append(sc_score_gdt.mean())
 
-                if save_structures:
+                rmsd_within_thresh_list.append((sc_score_rmsd <= RMSD_THRESHOLD).sum() / n_samples)
+                tm_within_thresh_list.append((sc_score_tm >= TM_THRESHOLD).sum() / n_samples)
+                gddt_within_thresh_list.append((sc_score_gdt >= GDT_THRESHOLD).sum() / n_samples)
+
+                if save_designs:
                     # collate designed sequences in fasta format
                     sequences = [SeqRecord(
                         Seq(raw_data["sequence"]), id=f"input_sequence,", 
@@ -274,15 +293,23 @@ def evaluate(
                     # write all designed sequences to output filepath
                     SeqIO.write(sequences, os.path.join(output_dir, "all_designs.fasta"), "fasta")
 
-    out = [df, samples_list, recovery_list, perplexity_list]
+    out = {
+        'df': df,
+        'samples_list': samples_list,
+        'recovery_list': recovery_list,
+        'perplexity_list': perplexity_list
+    }
     if 'sc_score_eternafold' in metrics:
-        out.append(sc_score_eternafold_list)
+        out['sc_score_eternafold'] = sc_score_eternafold_list
     if 'sc_score_ribonanzanet' in metrics:
-        out.append(sc_score_ribonanzanet_list)
+        out['sc_score_ribonanzanet'] = sc_score_ribonanzanet_list
     if 'sc_score_rhofold' in metrics:
-        out.append(sc_score_rmsd_list)
-        out.append(sc_score_tm_list)
-        out.append(sc_score_gddt_list)
+        out['sc_score_rmsd'] = sc_score_rmsd_list
+        out['sc_score_tm'] = sc_score_tm_list
+        out['sc_score_gddt'] = sc_score_gddt_list
+        out['rmsd_within_thresh'] = rmsd_within_thresh_list
+        out['tm_within_thresh'] = tm_within_thresh_list
+        out['gddt_within_thresh'] = gddt_within_thresh_list
     return out
 
 
@@ -404,11 +431,47 @@ def self_consistency_score_ribonanzanet(
     true_chem_mod = ribonanza_net.predict(true_sequence).unsqueeze(0).cpu().numpy()
 
     _samples = np.array([[num_to_letter[num] for num in seq] for seq in samples])
-    pred_chem_mod = ribonanza_net.predict(_samples)
+    pred_chem_mod = ribonanza_net.predict(_samples).cpu().numpy()
     if return_chem_mods:
-        return (np.abs(pred_chem_mod - true_chem_mod)).mean(2).mean(1), pred_chem_mod
+        return (np.abs(pred_chem_mod - true_chem_mod).mean(2).mean(1)), pred_chem_mod
     else:
-        return (np.abs(pred_chem_mod - true_chem_mod)).mean(2).mean(1)
+        return (np.abs(pred_chem_mod - true_chem_mod).mean(2).mean(1))
+
+
+def self_consistency_score_ribonanzanet_sec_struct(
+        samples, 
+        true_sec_struct, 
+        mask_coords, 
+        ribonanza_net_ss,
+        num_to_letter = NUM_TO_LETTER,
+        return_sec_structs = False
+    ):
+    # map from dotbracket to numerical representation
+    true_sec_struct = np.array(dotbracket_to_adjacency(true_sec_struct, keep_pseudoknots=True))
+    # mask out missing sequence coordinates
+    true_sec_struct = true_sec_struct[mask_coords][:, mask_coords]
+    # (n_samples, seq_len, seq_len)
+    true_sec_struct = torch.tensor(true_sec_struct)
+
+    _samples = np.array([[num_to_letter[num] for num in seq] for seq in samples])
+    _, pred_sec_structs = ribonanza_net_ss.predict(_samples)  # (n_samples, seq_len, seq_len)
+    
+    mcc_scores = []
+    for pred_sec_struct in pred_sec_structs:
+        # map from dotbracket to numerical representation
+        pred_sec_struct = torch.tensor(dotbracket_to_adjacency(pred_sec_struct, keep_pseudoknots=True))
+        # compute mean MCC score between pairs of true and predicted secondary structures
+        mcc_scores.append(
+            binary_matthews_corrcoef(
+                pred_sec_struct,
+                true_sec_struct,
+            ).float().mean()
+        )
+
+    if return_sec_structs:
+        return np.array(mcc_scores), pred_sec_structs
+    else:
+        return np.array(mcc_scores)
 
 
 def self_consistency_score_rhofold(
@@ -418,7 +481,8 @@ def self_consistency_score_rhofold(
         rhofold,
         output_dir,
         num_to_letter = NUM_TO_LETTER,
-        save_structures = False,
+        save_designs = False,
+        save_pdbs = False,
         use_relax = False,
     ):
     """
@@ -435,7 +499,8 @@ def self_consistency_score_rhofold(
         rhofold: RhoFold model
         output_dir: directory to save designed sequences and structures
         num_to_letter: lookup table mapping integers to nucleotides
-        save_structures: whether to save designed structures to output directory
+        save_designs: whether to save designs as fasta to output directory
+        save_pdbs: whether to save PDBs of forward-folded designs to output directory
         use_relax: whether to perform Amber relaxation on designed structures
 
     Workflow:
@@ -456,8 +521,7 @@ def self_consistency_score_rhofold(
         sc_tms: array of TM-score scores per sample
         sc_gddts: array of GDT scores per sample
     """
-    os.makedirs(os.path.join(output_dir, "fasta"), exist_ok=True)
-    os.makedirs(os.path.join(output_dir, "rhofold"), exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
 
     # Collate designed sequences in fasta format
     # first record: input sequence and model metadata
@@ -481,11 +545,11 @@ def self_consistency_score_rhofold(
             description=f"sample={idx}"
         )
         sequences.append(seq)
-        design_fasta_path = os.path.join(output_dir, f"fasta/design{idx}.fasta")
+        design_fasta_path = os.path.join(output_dir, f"design{idx}.fasta")
         SeqIO.write(seq, design_fasta_path, "fasta")
         
         # Forward fold designed sequence using RhoFold
-        design_pdb_path = os.path.join(output_dir, f"rhofold/design{idx}.pdb")
+        design_pdb_path = os.path.join(output_dir, f"design{idx}.pdb")
         rhofold.predict(design_fasta_path, design_pdb_path, use_relax)
         
         # Load C4' coordinates of designed structure
@@ -523,11 +587,12 @@ def self_consistency_score_rhofold(
         sc_tms.append(np.mean(_sc_tms))
         sc_gddts.append(np.mean(_sc_gddts))
 
-        if save_structures is False:
-            os.unlink(design_fasta_path)
+        # remove temporary files
+        os.unlink(design_fasta_path)
+        if save_pdbs is False:
             os.unlink(design_pdb_path)
     
-    if save_structures is False:
+    if save_designs is False:
         # remove output directory        
         shutil.rmtree(output_dir)
     else:

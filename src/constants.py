@@ -72,3 +72,9 @@ DOTBRACKET_TO_NUM = {
     '(': 1,
     ')': 2
 }
+
+
+# 3D self-consistency score thresholds for desingability/validity
+RMSD_THRESHOLD = 2.0
+TM_THRESHOLD = 0.45
+GDT_THRESHOLD = 0.50

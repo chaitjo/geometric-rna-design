@@ -10,7 +10,7 @@
   <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
 </a>
 
-✍️ New to 3D RNA modelling? Here's a currated reading + watch list for beginners: [Resources](https://www.chaitjo.com/post/rna-modelling-and-design/)
+✍️ New to 3D RNA modelling? Here's a curated reading + watch list for beginners: [Resources](https://www.chaitjo.com/post/rna-modelling-and-design/)
 
 📄 For more details on the methodology, see the accompanying paper: ['gRNAde: Geometric Deep Learning for 3D RNA inverse design'](https://arxiv.org/abs/2305.14749)
 > Chaitanya K. Joshi, Arian R. Jamasb, Ramon Viñas, Charles Harris, Simon Mathis, Alex Morehead, and Pietro Liò. gRNAde: Geometric Deep Learning for 3D RNA inverse design. *ICML Computational Biology Workshop, 2023.*
@@ -70,7 +70,7 @@ Next, install other compulsory dependencies:
 ```sh
 # Install other python libraries
 mamba install jupyterlab matplotlib seaborn pandas biopython biotite -c conda-forge
-pip install wandb gdown pyyaml ipdb python-dotenv tqdm cpdb-protein torchmetrics einops ml_collections mdanalysis MDAnalysisTests draw_rna
+pip install wandb gdown pyyaml ipdb python-dotenv tqdm cpdb-protein torchmetrics einops ml_collections mdanalysis MDAnalysisTests draw_rna arnie
 
 # Install X3DNA for secondary structure determination
 cd ~/geometric-rna-design/tools/
@@ -103,6 +103,14 @@ cd ~/geometric-rna-design/tools/
 git clone https://github.com/pylelab/USalign.git && cd USalign/ && git checkout 97325d3aad852f8a4407649f25e697bbaa17e186
 g++ -static -O3 -ffast-math -lm -o USalign USalign.cpp
 g++ -static -O3 -ffast-math -lm -o qTMclust qTMclust.cpp
+
+# (Optional) Install ViennaRNA, mainly used for plotting in design notebook
+cd ~/geometric-rna-design/tools/
+tar -zxvf ViennaRNA-2.6.4.tar.gz
+cd ViennaRNA-2.6.4
+./configure  # ./configure --enable-macosx-installer
+make
+sudo make install
 ```
 
 </details>
@@ -226,17 +234,27 @@ Each RNA will be processed into the following format (most of the metadata is op
 
 We have provided the splits used in our experiments in the `data/` directory:
 - Single-state split from [Das et al., 2010](https://www.nature.com/articles/nmeth.1433): `data/das_split.pt` (called the Das split for compatibility with older code)
-- Multi-state split of structurally flexible RNAs: `data/structsim_split.pt`
+- Multi-state split of structurally flexible RNAs: `data/structsim_split_v2.pt` (Note that we have deprecated an older version of the multi-state split)
 
 The precise procedure for creating the splits (which can be used to modify and customise them) can be found in the `notebooks/` directory. The exact PDB IDs used for each of the splits are also available in the `data/split_ids/` directory, in case you are using a different version of RNAsolo after the 31 October 2023 cutoff.
 
 ## Citation
 
 ```
-@article{joshi2023grnade,
+@article{joshi2024grnade,
   title={gRNAde: Geometric Deep Learning for 3D RNA inverse design},
-  author={Joshi, Chaitanya K. and Jamasb, Arian R. and Vi{\~n}as, Ramon and Harris, Charles and Mathis, Simon and Morehead, Alex and Anand, Rishabh and Li{\`o}, Pietro},
-  journal={arXiv preprint},
-  year={2023},
+  author={Joshi, Chaitanya K and Jamasb, Arian R and Vi{\~n}as, Ramon and Harris, Charles and Mathis, Simon V and Morehead, Alex and Anand, Rishabh and Li{\`o}, Pietro},
+  journal={bioRxiv},
+  year={2024},
+  publisher={Cold Spring Harbor Laboratory Preprints}
+}
+
+@incollection{joshi2024grnade,
+  title={gRNAde: A Geometric Deep Learning pipeline for 3D RNA inverse design},
+  author={Joshi, Chaitanya K and Li{\`o}, Pietro},
+  booktitle={RNA Design: Methods and Protocols},
+  pages={121--135},
+  year={2024},
+  publisher={Springer}
 }
 ```

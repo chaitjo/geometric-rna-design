@@ -187,19 +187,44 @@ def dotbracket_to_num(sec_struct: str) -> np.ndarray:
     return np.array([DOTBRACKET_TO_NUM[c] for c in sec_struct])
 
 
-def dotbracket_to_adjacency(sec_struct: str) -> np.ndarray:
+def dotbracket_to_adjacency(
+        sec_struct: str,
+        keep_pseudoknots: bool = False,
+    ) -> np.ndarray:
     """
     Convert secondary structure in dot-bracket notation to 
     adjacency matrix.
     """
     n = len(sec_struct)
     adj = np.zeros((n, n), dtype=np.int8)
-    stack = []
-    for i, db_char in enumerate(sec_struct):
-        if db_char == '(':
-            stack.append(i)
-        elif db_char == ')':
-            j = stack.pop()
-            adj[i, j] = 1
-            adj[j, i] = 1
+        
+    if keep_pseudoknots == False:
+        stack = []
+        for i, db_char in enumerate(sec_struct):
+            if db_char == '(':
+                stack.append(i)
+            elif db_char == ')':
+                j = stack.pop()
+                adj[i, j] = 1
+                adj[j, i] = 1
+    else:
+        stack={
+            '(':[],
+            '[':[],
+            '<':[],
+            '{':[]
+        }
+        pop={
+            ')':'(',
+            ']':'[',
+            '>':"<",
+            '}':'{'
+        }
+        for i, db_char in enumerate(sec_struct):
+            if db_char in stack:
+                stack[db_char].append((i, db_char))
+            elif db_char in pop:
+                forward_bracket = stack[pop[db_char]].pop()
+                adj[forward_bracket[0], i] = 1
+                adj[i, forward_bracket[0]] = 1    
     return adj

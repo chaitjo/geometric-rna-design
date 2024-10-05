@@ -1,8 +1,10 @@
 # Custom
+/notebooks/designs/
 /tools
 /data
 /wandb
 /slurm
+arnie_file.txt
 .DS_Store
 # *.ipynb
 

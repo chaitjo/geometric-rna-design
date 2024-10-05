@@ -1,3 +1,5 @@
+# Default training config to be used with main.py
+
 # Misc configurations
 device:
   value: 'gpu'
