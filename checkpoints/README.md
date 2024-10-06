@@ -22,7 +22,6 @@ For general usage and best performance, we recommend using the `all` split.
 | Model | Max. no. conformers | Max. training RNA length | Link | Sequence recovery | Self-consistency MCC |
 | --- | --- | --- | --- | --- | --- |
 | Autoregressive | 1 | 5000 | [gRNAde_ARv1_1state_das.h5](gRNAde_ARv1_1state_das.h5) | 0.5278 | 0.6304 |
-| Autoregressive | 2 | 5000 | [gRNAde_ARv1_2state_das.h5](gRNAde_ARv1_2state_das.h5) | 0.5140 | 0.6163 |
 | Autoregressive | 3 | 5000 | [gRNAde_ARv1_3state_das.h5](gRNAde_ARv1_3state_das.h5) | 0.5424 | 0.6204 |
 | Autoregressive | 5 | 5000 | [gRNAde_ARv1_5state_das.h5](gRNAde_ARv1_5state_das.h5) | 0.5669 | 0.6296 |
 | | | | |
