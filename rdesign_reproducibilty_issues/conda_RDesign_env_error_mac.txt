@@ -1,0 +1,176 @@
+(base) anonymous@anonymous Desktop % git clone https://github.com/A4Bio/RDesign
+Cloning into 'RDesign'...
+remote: Enumerating objects: 92, done.
+remote: Counting objects: 100% (92/92), done.
+remote: Compressing objects: 100% (86/86), done.
+remote: Total 92 (delta 35), reused 30 (delta 4), pack-reused 0 (from 0)
+Receiving objects: 100% (92/92), 14.66 MiB | 1.25 MiB/s, done.
+Resolving deltas: 100% (35/35), done.
+(base) anonymous@anonymous Desktop % cd RDesign
+(base) anonymous@anonymous RDesign % conda env create -f environment.yml
+Retrieving notices: ...working... done
+Warning: you have pip-installed dependencies in your environment file, but you do not list pip itself as one of your conda dependencies.  Conda may not use the correct pip to install your packages, and they may end up in the wrong place.  Please add an explicit pip dependency.  I'm adding one for you, but still nagging you.
+Collecting package metadata (repodata.json): - WARNING conda.models.version:get_matcher(546): Using .* with relational operator is superfluous and deprecated and will be removed in a future version of conda. Your spec was 1.8.0.*, but conda is ignoring the .* and treating it as 1.8.0
+WARNING conda.models.version:get_matcher(546): Using .* with relational operator is superfluous and deprecated and will be removed in a future version of conda. Your spec was 1.9.0.*, but conda is ignoring the .* and treating it as 1.9.0
+done
+Solving environment: failed
+
+ResolvePackageNotFound:
+  - libgomp==11.2.0=h1d223b6_11
+  - libwebp-base==1.2.1=h7f98852_0
+  - libxml2==2.9.12=h885dcf4_1
+  - expat==2.4.8=h27087fc_0
+  - mkl==2020.2=256
+  - libllvm13==13.0.1=hf817b99_2
+  - nspr==4.32=h9c3ff4c_1
+  - intel-openmp==2019.4=243
+  - nettle==3.6=he412f7d_0
+  - lcms2==2.12=hddcbb42_0
+  - libbrotlidec==1.0.9=h7f98852_6
+  - blas==1.0=mkl
+  - libuv==1.43.0=h7f98852_0
+  - zeromq==4.3.4=h9c3ff4c_1
+  - hdf5==1.12.1=nompi_h2386368_104
+  - keyutils==1.6.1=h166bdaf_0
+  - pytorch-scatter==2.0.9=py39_torch_1.11.0_cu113
+  - setuptools==59.8.0=py39hf3d152e_0
+  - libpq==14.3=hd77ab85_0
+  - mmseqs2==13.45111=pl5321hf1761c0_2
+  - libgcc-ng==11.2.0=h1d223b6_11
+  - libcblas==3.9.0=5_h92ddd45_netlib
+  - psutil==5.9.1=py39hb9d737c_0
+  - libxcb==1.13=h7f98852_1004
+  - _libgcc_mutex==0.1=conda_forge
+  - mysql-common==8.0.28=ha770c72_0
+  - wget==1.20.3=ha56f1ee_1
+  - pcre==8.45=h9c3ff4c_0
+  - gawk==5.1.0=h7f98852_0
+  - libmklml==2019.0.5=h06a4308_0
+  - perl==5.32.1=2_h7f98852_perl5
+  - dbus==1.13.6=h5008d03_3
+  - reportlab==3.5.68=py39he59360d_1
+  - libopenblas==0.3.18=pthreads_h8fe5266_0
+  - libstdcxx-ng==11.2.0=he4da1e4_11
+  - cudatoolkit==11.3.1=h9edb442_10
+  - libbrotlienc==1.0.9=h7f98852_6
+  - xorg-libsm==1.2.3=hd9c2040_1000
+  - libtiff==4.3.0=h6f004c6_2
+  - sqlite==3.37.0=h9cd32fc_0
+  - gst-plugins-base==1.18.5=hf529b03_3
+  - xorg-libxrender==0.9.10=h7f98852_1003
+  - pytorch-sparse==0.6.14=py39_torch_1.11.0_cu113
+  - zlib==1.2.11=h36c2ea0_1013
+  - markupsafe==2.1.1=py39hb9d737c_1
+  - openjpeg==2.4.0=hb52868f_1
+  - xz==5.2.5=h516909a_1
+  - importlib-metadata==4.11.4=py39hf3d152e_0
+  - openssl==1.1.1o=h166bdaf_0
+  - qt==5.12.9=ha98a1a1_5
+  - jpeg==9d=h36c2ea0_0
+  - pandoc==2.19=ha770c72_0
+  - gettext==0.19.8.1=h73d1719_1008
+  - certifi==2022.6.15=py39hf3d152e_0
+  - libbrotlicommon==1.0.9=h7f98852_6
+  - libiconv==1.16=h516909a_0
+  - jupyter_core==4.11.0=py39hf3d152e_0
+  - terminado==0.15.0=py39hf3d152e_0
+  - kiwisolver==1.3.2=py39h1a9c180_1
+  - fontconfig==2.13.1=hba837de_1005
+  - pytorch-cluster==1.6.0=py39_torch_1.11.0_cu113
+  - freetype==2.10.4=h0708190_1
+  - pyqt==5.12.3=py39h03dd644_4
+  - xorg-libxau==1.0.9=h7f98852_0
+  - brotli==1.0.9=h7f98852_6
+  - xorg-renderproto==0.11.1=h7f98852_1002
+  - libedit==3.1.20191231=he28a2e2_2
+  - libclang==13.0.1=default_hc23dcda_0
+  - xorg-libxdmcp==1.1.3=h7f98852_0
+  - pyyaml==6.0=py39hb9d737c_4
+  - debugpy==1.6.0=py39h5a03fae_0
+  - pyzmq==22.3.0=py39headdf64_2
+  - xorg-xproto==7.0.31=h7f98852_1007
+  - ld_impl_linux-64==2.36.1=hea4e1c9_2
+  - fonttools==4.28.5=py39h3811e60_0
+  - xorg-libice==1.0.10=h7f98852_0
+  - matplotlib-base==3.5.1=py39h2fa2bec_0
+  - libidn2==2.3.2=h7f8727e_0
+  - libcurl==7.83.1=h7bff187_0
+  - libpng==1.6.37=h21135ba_2
+  - greenlet==1.1.2=py39he80948d_1
+  - nss==3.74=hb5efdd6_0
+  - libssh2==1.10.0=ha56f1ee_2
+  - gmp==6.2.1=h58526e2_0
+  - libvorbis==1.3.7=h9c3ff4c_0
+  - mysql-libs==8.0.28=hfa10184_0
+  - xorg-libxext==1.3.4=h7f98852_1
+  - h5py==3.6.0=nompi_py39h7e08c79_100
+  - libgfortran-ng==11.2.0=h69a702a_11
+  - cryptography==37.0.1=py39h9ce1e76_0
+  - pytorch-spline-conv==1.2.1=py39_torch_1.11.0_cu113
+  - brotli-bin==1.0.9=h7f98852_6
+  - jedi==0.18.1=py39hf3d152e_1
+  - libxkbcommon==1.0.3=he3ba5ed_0
+  - libogg==1.3.4=h7f98852_1
+  - python==3.9.9=h62f1059_0_cpython
+  - libopus==1.3.1=h7f98852_1
+  - brotlipy==0.7.0=py39hb9d737c_1004
+  - libgfortran5==11.2.0=h5c6108e_11
+  - ncurses==6.2=h58526e2_4
+  - libev==4.33=h516909a_1
+  - tk==8.6.11=h27826a3_1
+  - zstd==1.5.1=ha95c52a_0
+  - libnsl==2.0.0=h7f98852_0
+  - ipython==8.4.0=py39hf3d152e_0
+  - jupyter==1.0.0=py39hf3d152e_7
+  - ffmpeg==4.3=hf484d3e_0
+  - boost-cpp==1.74.0=h359cf19_5
+  - bzip2==1.0.8=h7f98852_4
+  - lz4-c==1.9.3=h9c3ff4c_1
+  - cairo==1.16.0=ha00ac49_1009
+  - libunistring==0.9.10=h7f98852_0
+  - ca-certificates==2022.6.15=ha878542_0
+  - lame==3.100=h7f98852_1001
+  - pandas==1.3.5=py39hde0f152_0
+  - jbig==2.1=h7f98852_2003
+  - xorg-libx11==1.7.2=h7f98852_0
+  - icu==69.1=h9c3ff4c_0
+  - pyrsistent==0.18.1=py39hb9d737c_1
+  - pycairo==1.20.1=py39hedcb9fc_1
+  - pixman==0.40.0=h36c2ea0_0
+  - libblas==3.9.0=1_h86c2bf4_netlib
+  - torchaudio==0.11.0=py39_cu113
+  - yaml==0.2.5=h7f98852_2
+  - _openmp_mutex==4.5=1_gnu
+  - boost==1.74.0=py39h5472131_4
+  - gstreamer==1.18.5=h9f60fe5_3
+  - pytorch==1.11.0=py3.9_cuda11.3_cudnn8.2.0_0
+  - tornado==6.1=py39hb9d737c_3
+  - xorg-kbproto==1.0.7=h7f98852_1002
+  - numpy==1.22.0=py39h91f2184_0
+  - pysocks==1.7.1=py39hf3d152e_5
+  - libevent==2.1.10=h9b69904_4
+  - krb5==1.19.3=h3790be6_0
+  - pthread-stubs==0.4=h36c2ea0_1001
+  - ninja==1.10.2=h4bd325d_1
+  - libffi==3.4.2=h7f98852_5
+  - libzlib==1.2.11=h36c2ea0_1013
+  - libuuid==2.32.1=h7f98852_1000
+  - sqlalchemy==1.4.29=py39h3811e60_0
+  - pyg==2.0.4=py39_torch_1.11.0_cu113
+  - alsa-lib==1.2.3.2=h166bdaf_0
+  - mistune==0.8.4=py39h3811e60_1005
+  - libdeflate==1.8=h7f98852_0
+  - readline==8.1=h46c0cb4_0
+  - libglib==2.70.2=h174f98d_1
+  - xorg-xextproto==7.3.0=h7f98852_1002
+  - torchvision==0.12.0=py39_cu113
+  - gnutls==3.6.13=h85f3911_1
+  - c-ares==1.18.1=h7f98852_0
+  - libsodium==1.0.18=h36c2ea0_1
+  - lerc==3.0=h9c3ff4c_0
+  - libnghttp2==1.47.0=h727a467_0
+  - argon2-cffi-bindings==21.2.0=py39hb9d737c_2
+  - openh264==2.1.1=h780b84a_0
+  - rdkit==2021.09.4=py39hccf6a74_0
+  - cffi==1.15.0=py39h4bc2ebd_0
+  - liblapack==3.9.0=5_h92ddd45_netlib

@@ -1,0 +1,261 @@
+Warning: you have pip-installed dependencies in your environment file, but you do not list pip itself as one of your conda dependencies.  Conda may not use the correct pip to install your packages, and they may end up in the wrong place.  Please add an explicit pip dependency.  I'm adding one for you, but still nagging you.
+Collecting package metadata (repodata.json): ...working... WARNING conda.models.version:get_matcher(546): Using .* with relational operator is superfluous and deprecated and will be removed in a future version of conda. Your spec was 1.8.0.*, but conda is ignoring the .* and treating it as 1.8.0
+WARNING conda.models.version:get_matcher(546): Using .* with relational operator is superfluous and deprecated and will be removed in a future version of conda. Your spec was 1.9.0.*, but conda is ignoring the .* and treating it as 1.9.0
+WARNING conda.models.version:get_matcher(546): Using .* with relational operator is superfluous and deprecated and will be removed in a future version of conda. Your spec was 1.7.1.*, but conda is ignoring the .* and treating it as 1.7.1
+WARNING conda.models.version:get_matcher(546): Using .* with relational operator is superfluous and deprecated and will be removed in a future version of conda. Your spec was 1.6.0.*, but conda is ignoring the .* and treating it as 1.6.0
+done
+Solving environment: ...working... done
+
+Downloading and Extracting Packages
+
+Preparing transaction: ...working... done
+Verifying transaction: ...working... done
+Executing transaction: ...working... By downloading and using the CUDA Toolkit conda packages, you accept the terms and conditions of the CUDA End User License Agreement (EULA): https://docs.nvidia.com/cuda/eula/index.html
+
+done
+Installing pip dependencies: ...working... Ran pip subprocess with arguments:
+['/home/user/miniforge3/envs/RDesign/bin/python', '-m', 'pip', 'install', '-U', '-r', '/home/user/RDesign/condaenv.g4o8gb7l.requirements.txt', '--exists-action=b']
+Pip subprocess output:
+Collecting addict==2.4.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 1))
+  Downloading addict-2.4.0-py3-none-any.whl.metadata (1.0 kB)
+Collecting antlr4-python3-runtime==4.9.3 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 2))
+  Using cached antlr4-python3-runtime-4.9.3.tar.gz (117 kB)
+  Preparing metadata (setup.py): started
+  Preparing metadata (setup.py): finished with status 'done'
+Collecting appdirs==1.4.4 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 3))
+  Using cached appdirs-1.4.4-py2.py3-none-any.whl.metadata (9.0 kB)
+Collecting astor==0.8.1 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 4))
+  Downloading astor-0.8.1-py2.py3-none-any.whl.metadata (4.2 kB)
+Collecting autopep8==1.6.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 5))
+  Downloading autopep8-1.6.0-py2.py3-none-any.whl.metadata (16 kB)
+Collecting biopython==1.80 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 6))
+  Downloading biopython-1.80-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (13 kB)
+Collecting captum==0.2.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 7))
+  Downloading captum-0.2.0-py3-none-any.whl.metadata (22 kB)
+Collecting cftime==1.6.1 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 8))
+  Downloading cftime-1.6.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (8.2 kB)
+Collecting charset-normalizer==2.0.10 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 9))
+  Downloading charset_normalizer-2.0.10-py3-none-any.whl.metadata (11 kB)
+Collecting cilog==1.2.3 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 10))
+  Downloading cilog-1.2.3-py3-none-any.whl.metadata (9.9 kB)
+Collecting click==8.1.3 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 11))
+  Downloading click-8.1.3-py3-none-any.whl.metadata (3.2 kB)
+Collecting cloudpickle==2.0.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 12))
+  Downloading cloudpickle-2.0.0-py3-none-any.whl.metadata (6.9 kB)
+Collecting colorama==0.4.4 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 13))
+  Downloading colorama-0.4.4-py2.py3-none-any.whl.metadata (14 kB)
+Collecting contextlib2==21.6.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 14))
+  Using cached contextlib2-21.6.0-py2.py3-none-any.whl.metadata (4.1 kB)
+Collecting dask==2022.6.1 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 15))
+  Downloading dask-2022.6.1-py3-none-any.whl.metadata (3.5 kB)
+Collecting dill==0.3.4 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 16))
+  Downloading dill-0.3.4-py2.py3-none-any.whl.metadata (9.6 kB)
+Collecting dive-into-graphs==1.0.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 17))
+  Downloading dive_into_graphs-1.0.0-py3-none-any.whl.metadata (11 kB)
+Collecting docker-pycreds==0.4.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 18))
+  Using cached docker_pycreds-0.4.0-py2.py3-none-any.whl.metadata (1.8 kB)
+Collecting et-xmlfile==1.1.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 19))
+  Downloading et_xmlfile-1.1.0-py3-none-any.whl.metadata (1.8 kB)
+Collecting filelock==3.4.2 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 20))
+  Downloading filelock-3.4.2-py3-none-any.whl.metadata (2.6 kB)
+Collecting focal-frequency-loss==0.3.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 21))
+  Downloading focal_frequency_loss-0.3.0-py3-none-any.whl.metadata (9.5 kB)
+Collecting fsspec==2022.5.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 22))
+  Downloading fsspec-2022.5.0-py3-none-any.whl.metadata (5.5 kB)
+Collecting future==0.18.2 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 23))
+  Downloading future-0.18.2.tar.gz (829 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 829.2/829.2 kB 14.2 MB/s eta 0:00:00
+  Preparing metadata (setup.py): started
+  Preparing metadata (setup.py): finished with status 'done'
+Collecting fvcore==0.1.5.post20220506 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 24))
+  Downloading fvcore-0.1.5.post20220506.tar.gz (50 kB)
+  Preparing metadata (setup.py): started
+  Preparing metadata (setup.py): finished with status 'done'
+Collecting gitdb==4.0.10 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 25))
+  Downloading gitdb-4.0.10-py3-none-any.whl.metadata (1.1 kB)
+Collecting gitpython==3.1.30 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 26))
+  Downloading GitPython-3.1.30-py3-none-any.whl.metadata (1.3 kB)
+Collecting h5netcdf==1.0.1 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 27))
+  Downloading h5netcdf-1.0.1-py2.py3-none-any.whl.metadata (10 kB)
+Collecting hickle==5.0.0.dev0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 28))
+  Downloading hickle-5.0.0.dev0-py3-none-any.whl.metadata (22 kB)
+Collecting hydra-core==1.2.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 29))
+  Downloading hydra_core-1.2.0-py3-none-any.whl.metadata (4.0 kB)
+Collecting hyperopt==0.1.2 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 30))
+  Downloading hyperopt-0.1.2-py3-none-any.whl.metadata (1.2 kB)
+Collecting imageio==2.16.1 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 31))
+  Downloading imageio-2.16.1-py3-none-any.whl.metadata (4.2 kB)
+Collecting iopath==0.1.9 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 32))
+  Downloading iopath-0.1.9-py3-none-any.whl.metadata (370 bytes)
+Collecting json-tricks==3.15.5 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 33))
+  Downloading json_tricks-3.15.5-py2.py3-none-any.whl.metadata (17 kB)
+Collecting llvmlite==0.39.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 34))
+  Downloading llvmlite-0.39.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.7 kB)
+Collecting locket==1.0.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 35))
+  Using cached locket-1.0.0-py2.py3-none-any.whl.metadata (2.8 kB)
+Collecting lpips==0.1.4 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 36))
+  Downloading lpips-0.1.4-py3-none-any.whl.metadata (10 kB)
+Collecting mmcv-full==1.4.8 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 37))
+  Downloading mmcv-full-1.4.8.tar.gz (498 kB)
+  Preparing metadata (setup.py): started
+  Preparing metadata (setup.py): finished with status 'done'
+Collecting mock==4.0.3 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 38))
+  Downloading mock-4.0.3-py3-none-any.whl.metadata (2.8 kB)
+Collecting mpmath==1.2.1 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 39))
+  Downloading mpmath-1.2.1-py3-none-any.whl.metadata (8.3 kB)
+Collecting mypy-extensions==0.4.3 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 40))
+  Downloading mypy_extensions-0.4.3-py2.py3-none-any.whl.metadata (1.2 kB)
+Collecting netcdf4==1.6.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 41))
+  Downloading netCDF4-1.6.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (1.6 kB)
+Collecting networkx==2.6.3 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 42))
+  Downloading networkx-2.6.3-py3-none-any.whl.metadata (5.0 kB)
+Collecting nni==2.6.1 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 43))
+  Downloading nni-2.6.1-py3-none-manylinux1_x86_64.whl.metadata (27 kB)
+Collecting numba==0.56.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 44))
+  Downloading numba-0.56.0-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.8 kB)
+Collecting omegaconf==2.2.2 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 45))
+  Downloading omegaconf-2.2.2-py3-none-any.whl.metadata (3.9 kB)
+Collecting opencv-python==4.5.5.64 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 46))
+  Downloading opencv_python-4.5.5.64-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (18 kB)
+Collecting opencv-python-headless==4.5.5.64 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 47))
+  Downloading opencv_python_headless-4.5.5.64-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (18 kB)
+Collecting openpyxl==3.0.10 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 48))
+  Downloading openpyxl-3.0.10-py2.py3-none-any.whl.metadata (2.4 kB)
+Collecting partd==1.2.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 49))
+  Downloading partd-1.2.0-py3-none-any.whl.metadata (4.6 kB)
+Collecting pathtools==0.1.2 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 50))
+  Using cached pathtools-0.1.2.tar.gz (11 kB)
+  Preparing metadata (setup.py): started
+  Preparing metadata (setup.py): finished with status 'done'
+Collecting pillow==9.0.1 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 51))
+  Downloading Pillow-9.0.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.6 kB)
+Collecting pip==22.0.4 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 52))
+  Downloading pip-22.0.4-py3-none-any.whl.metadata (4.2 kB)
+Collecting portalocker==2.4.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 53))
+  Downloading portalocker-2.4.0-py2.py3-none-any.whl.metadata (6.8 kB)
+Collecting prettytable==3.0.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 54))
+  Downloading prettytable-3.0.0-py3-none-any.whl.metadata (22 kB)
+Collecting protobuf==4.21.12 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 55))
+  Downloading protobuf-4.21.12-cp37-abi3-manylinux2014_x86_64.whl.metadata (541 bytes)
+Collecting ptflops==0.6.8 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 56))
+  Downloading ptflops-0.6.8.tar.gz (12 kB)
+  Preparing metadata (setup.py): started
+  Preparing metadata (setup.py): finished with status 'done'
+Collecting pycodestyle==2.8.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 57))
+  Downloading pycodestyle-2.8.0-py2.py3-none-any.whl.metadata (31 kB)
+Collecting pymongo==4.0.1 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 58))
+  Downloading pymongo-4.0.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (8.4 kB)
+Requirement already satisfied: pyqt5-sip==4.19.18 in /home/user/miniforge3/envs/RDesign/lib/python3.9/site-packages (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 59)) (4.19.18)
+Requirement already satisfied: pyqtchart==5.12 in /home/user/miniforge3/envs/RDesign/lib/python3.9/site-packages (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 60)) (5.12)
+Requirement already satisfied: pyqtwebengine==5.12.1 in /home/user/miniforge3/envs/RDesign/lib/python3.9/site-packages (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 61)) (5.12.1)
+Collecting pyscf==1.7.6.post1 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 62))
+  Downloading pyscf-1.7.6.post1-cp39-cp39-manylinux1_x86_64.whl.metadata (1.4 kB)
+Collecting pythonwebhdfs==0.2.3 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 63))
+  Downloading PythonWebHDFS-0.2.3-py3-none-any.whl.metadata (717 bytes)
+Collecting pywavelets==1.3.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 64))
+  Downloading PyWavelets-1.3.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (1.9 kB)
+Collecting rdkit-pypi==2022.3.4 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 65))
+  Downloading rdkit_pypi-2022.3.4-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (3.6 kB)
+Collecting requests==2.27.1 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 66))
+  Downloading requests-2.27.1-py2.py3-none-any.whl.metadata (5.0 kB)
+Collecting responses==0.17.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 67))
+  Downloading responses-0.17.0-py2.py3-none-any.whl.metadata (27 kB)
+Collecting schema==0.7.5 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 68))
+  Downloading schema-0.7.5-py2.py3-none-any.whl.metadata (34 kB)
+Collecting scikit-image==0.16.2 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 69))
+  Downloading scikit-image-0.16.2.tar.gz (28.9 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 28.9/28.9 MB 37.2 MB/s eta 0:00:00
+  Preparing metadata (setup.py): started
+  Preparing metadata (setup.py): finished with status 'done'
+Collecting scikit-learn==1.0.2 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 70))
+  Downloading scikit_learn-1.0.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (10 kB)
+Collecting scipy==1.8.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 71))
+  Downloading scipy-1.8.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (2.2 kB)
+Collecting sentry-sdk==1.15.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 72))
+  Downloading sentry_sdk-1.15.0-py2.py3-none-any.whl.metadata (8.5 kB)
+Collecting setproctitle==1.3.2 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 73))
+  Downloading setproctitle-1.3.2-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (9.8 kB)
+Collecting shap==0.41.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 74))
+  Downloading shap-0.41.0-cp39-cp39-manylinux_2_12_x86_64.manylinux2010_x86_64.whl.metadata (3.0 kB)
+Collecting simplejson==3.17.6 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 75))
+  Downloading simplejson-3.17.6-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl.metadata (3.0 kB)
+Collecting slicer==0.0.7 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 76))
+  Downloading slicer-0.0.7-py3-none-any.whl.metadata (3.7 kB)
+Collecting smmap==5.0.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 77))
+  Downloading smmap-5.0.0-py3-none-any.whl.metadata (4.2 kB)
+Collecting subword-nmt==0.3.8 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 78))
+  Downloading subword_nmt-0.3.8-py3-none-any.whl.metadata (9.2 kB)
+Collecting sympy==1.10.1 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 79))
+  Downloading sympy-1.10.1-py3-none-any.whl.metadata (12 kB)
+Collecting tabulate==0.8.9 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 80))
+  Downloading tabulate-0.8.9-py3-none-any.whl.metadata (23 kB)
+Collecting termcolor==1.1.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 81))
+  Downloading termcolor-1.1.0.tar.gz (3.9 kB)
+  Preparing metadata (setup.py): started
+  Preparing metadata (setup.py): finished with status 'done'
+Collecting threadpoolctl==3.0.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 82))
+  Downloading threadpoolctl-3.0.0-py3-none-any.whl.metadata (8.8 kB)
+Collecting timm==0.5.4 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 83))
+  Downloading timm-0.5.4-py3-none-any.whl.metadata (36 kB)
+Collecting toml==0.10.2 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 84))
+  Downloading toml-0.10.2-py2.py3-none-any.whl.metadata (7.1 kB)
+Collecting toolz==0.11.2 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 85))
+  Downloading toolz-0.11.2-py3-none-any.whl.metadata (5.1 kB)
+Collecting tqdm==4.62.3 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 86))
+  Downloading tqdm-4.62.3-py2.py3-none-any.whl.metadata (56 kB)
+Collecting typed-argument-parser==1.7.2 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 87))
+  Downloading typed-argument-parser-1.7.2.tar.gz (27 kB)
+  Preparing metadata (setup.py): started
+  Preparing metadata (setup.py): finished with status 'done'
+Collecting typeguard==2.13.3 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 88))
+  Using cached typeguard-2.13.3-py3-none-any.whl.metadata (3.6 kB)
+Collecting typing-inspect==0.7.1 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 89))
+  Downloading typing_inspect-0.7.1-py3-none-any.whl.metadata (1.5 kB)
+Collecting urllib3==1.26.8 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 90))
+  Downloading urllib3-1.26.8-py2.py3-none-any.whl.metadata (45 kB)
+Collecting wandb==0.13.10 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 91))
+  Downloading wandb-0.13.10-py3-none-any.whl.metadata (7.7 kB)
+Collecting websockets==10.1 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 92))
+  Downloading websockets-10.1-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl.metadata (6.3 kB)
+Collecting xarray==2022.3.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 93))
+  Downloading xarray-2022.3.0-py3-none-any.whl.metadata (6.0 kB)
+Collecting yapf==0.32.0 (from -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 94))
+  Downloading yapf-0.32.0-py2.py3-none-any.whl.metadata (34 kB)
+Requirement already satisfied: numpy in /home/user/miniforge3/envs/RDesign/lib/python3.9/site-packages (from biopython==1.80->-r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 6)) (1.22.0)
+Requirement already satisfied: matplotlib in /home/user/miniforge3/envs/RDesign/lib/python3.9/site-packages (from captum==0.2.0->-r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 7)) (3.5.1)
+Requirement already satisfied: torch>=1.2 in /home/user/miniforge3/envs/RDesign/lib/python3.9/site-packages (from captum==0.2.0->-r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 7)) (1.11.0)
+Requirement already satisfied: pandas in /home/user/miniforge3/envs/RDesign/lib/python3.9/site-packages (from cilog==1.2.3->-r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 10)) (1.3.5)
+Requirement already satisfied: packaging>=20.0 in /home/user/miniforge3/envs/RDesign/lib/python3.9/site-packages (from dask==2022.6.1->-r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 15)) (21.3)
+Requirement already satisfied: pyyaml>=5.3.1 in /home/user/miniforge3/envs/RDesign/lib/python3.9/site-packages (from dask==2022.6.1->-r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 15)) (6.0)
+Requirement already satisfied: IPython in /home/user/miniforge3/envs/RDesign/lib/python3.9/site-packages (from dive-into-graphs==1.0.0->-r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 17)) (8.4.0)
+Requirement already satisfied: six>=1.4.0 in /home/user/miniforge3/envs/RDesign/lib/python3.9/site-packages (from docker-pycreds==0.4.0->-r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 18)) (1.16.0)
+Requirement already satisfied: yacs>=0.1.6 in /home/user/miniforge3/envs/RDesign/lib/python3.9/site-packages (from fvcore==0.1.5.post20220506->-r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 24)) (0.1.8)
+Requirement already satisfied: h5py in /home/user/miniforge3/envs/RDesign/lib/python3.9/site-packages (from h5netcdf==1.0.1->-r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 27)) (3.6.0)
+Requirement already satisfied: torchvision>=0.2.1 in /home/user/miniforge3/envs/RDesign/lib/python3.9/site-packages (from lpips==0.1.4->-r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 36)) (0.12.0)
+Requirement already satisfied: psutil in /home/user/miniforge3/envs/RDesign/lib/python3.9/site-packages (from nni==2.6.1->-r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 43)) (5.9.1)
+Requirement already satisfied: setuptools in /home/user/miniforge3/envs/RDesign/lib/python3.9/site-packages (from numba==0.56.0->-r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 44)) (59.8.0)
+Requirement already satisfied: wcwidth in /home/user/miniforge3/envs/RDesign/lib/python3.9/site-packages (from prettytable==3.0.0->-r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 54)) (0.2.5)
+Requirement already satisfied: certifi>=2017.4.17 in /home/user/miniforge3/envs/RDesign/lib/python3.9/site-packages (from requests==2.27.1->-r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 66)) (2022.6.15)
+Requirement already satisfied: idna<4,>=2.5 in /home/user/miniforge3/envs/RDesign/lib/python3.9/site-packages (from requests==2.27.1->-r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 66)) (3.3)
+Requirement already satisfied: joblib>=0.11 in /home/user/miniforge3/envs/RDesign/lib/python3.9/site-packages (from scikit-learn==1.0.2->-r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 70)) (1.1.0)
+INFO: pip is looking at multiple versions of sentry-sdk to determine which version is compatible with other requirements. This could take a while.
+
+The conflict is caused by:
+    The user requested urllib3==1.26.8
+    requests 2.27.1 depends on urllib3<1.27 and >=1.21.1
+    responses 0.17.0 depends on urllib3>=1.25.10
+    sentry-sdk 1.15.0 depends on urllib3>=1.26.11; python_version >= "3.6"
+
+To fix this you could try to:
+1. loosen the range of package versions you've specified
+2. remove package versions to allow pip to attempt to solve the dependency conflict
+
+Pip subprocess error:
+ERROR: Cannot install -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 66), -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 67), -r /home/user/RDesign/condaenv.g4o8gb7l.requirements.txt (line 72) and urllib3==1.26.8 because these package versions have conflicting dependencies.
+ERROR: ResolutionImpossible: for help visit https://pip.pypa.io/en/latest/topics/dependency-resolution/#dealing-with-dependency-conflicts
+
+
+failed
+
+CondaEnvException: Pip failed
+
