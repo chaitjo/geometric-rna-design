@@ -391,51 +391,51 @@ def self_consistency_score_eternafold(
 
 
 def self_consistency_score_ribonanzanet(
-        samples, 
-        true_sequence,
-        mask_coords, 
-        ribonanza_net,
-        num_to_letter = NUM_TO_LETTER,
-        return_chem_mods = False
-    ):
-    """
-    Compute self consistency score for an RNA, given the (predicted) chemical modifications
-    for the original RNA and a list of designed sequences. 
-    RibonanzaNet is used to 'forward fold' the designs.
+    samples,
+    true_sequence,
+    mask_seq,
+    ribonanza_net,
+    num_to_letter=NUM_TO_LETTER,
+    return_chem_mods=False,
+):
+    """Compute self consistency score for an RNA, given the (predicted) chemical modifications for
+    the original RNA and a list of designed sequences. RibonanzaNet is used to 'forward fold' the
+    designs.
 
     Args:
         samples: designed sequences of shape (n_samples, seq_len)
         true_sequence: true RNA sequence used to predict chemical modifications
-        mask_coords: mask for missing sequence coordinates to be ignored during evaluation
+        mask_seq: mask for missing sequence coordinates to be ignored during evaluation
         ribonanza_net: RibonanzaNet model
         num_to_letter: lookup table mapping integers to nucleotides
         return_chem_mods: whether to return the predicted chemical modifications
-    
+
     Workflow:
-            
+
         Input: For a given RNA molecule, we are given:
         - Designed sequences of shape (n_samples, seq_len)
-        - Predicted chemical modifications for original sequence, 
-          of shape (n_samples, seq_len, 2), predicted via RibonanzaNet
-        
+        - Predicted chemical modifications for original sequence,
+          of shape (n_samples, seq_len, 2), predicted via RibonanzaNet, of which we take
+          the index 0 from the last channal --> 2A3/SHAPE.
+
         For each designed sequence:
         - Predict chemical modifications using RibonanzaNet
         - Compute mean absolute error between prediction and chemical modifications for
           the original sequence
-        
+
         Take the average mean absolute error across all n_samples designed sequences
     """
     # Compute original sequence's chemical modifications using RibonanzaNet
     true_sequence = np.array([char for char in true_sequence])
-    true_sequence = "".join(true_sequence[mask_coords])
-    true_chem_mod = ribonanza_net.predict(true_sequence).unsqueeze(0).cpu().numpy()
+    true_sequence = "".join(true_sequence[mask_seq])
+    true_chem_mod = ribonanza_net.predict(true_sequence).unsqueeze(0).cpu().numpy()[:,:,0]
 
     _samples = np.array([[num_to_letter[num] for num in seq] for seq in samples])
-    pred_chem_mod = ribonanza_net.predict(_samples).cpu().numpy()
+    pred_chem_mod = ribonanza_net.predict(_samples[:, mask_seq]).cpu().numpy()[:,:,0]
     if return_chem_mods:
-        return (np.abs(pred_chem_mod - true_chem_mod).mean(2).mean(1)), pred_chem_mod
+        return (np.abs(pred_chem_mod - true_chem_mod).mean(1)), pred_chem_mod
     else:
-        return (np.abs(pred_chem_mod - true_chem_mod).mean(2).mean(1))
+        return np.abs(pred_chem_mod - true_chem_mod).mean(1)
 
 
 def self_consistency_score_ribonanzanet_sec_struct(
