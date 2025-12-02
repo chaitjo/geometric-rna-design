@@ -1,4 +1,10 @@
-# 💣 gRNAde: Geometric Deep Learning for 3D RNA Inverse Design
+# Generative inverse design of RNA structure and function with gRNAde
+
+An improved version of the gRNAde codebase is coming soon! Till then, check out the [new bioRxiv preprint](https://www.biorxiv.org/content/10.1101/2025.11.29.691298) where we experimentally validated gRNAde in the wet lab for a range of challenging RNA structure and function design problems. 🎉
+
+---
+
+# gRNAde: Geometric Deep Learning for 3D RNA Inverse Design
 
 **gRNAde** is a **g**eometric deep learning pipeline for 3D **RNA** inverse **de**sign, analogous to [ProteinMPNN](https://github.com/dauparas/ProteinMPNN) for protein design. 
 
