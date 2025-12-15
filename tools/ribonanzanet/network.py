@@ -1,4 +1,22 @@
+"""
+RibonanzaNet: Neural network architecture for RNA reactivity prediction.
+
+This module implements the RibonanzaNet model, which uses transformer-based architecture with
+pairwise features and triangular attention mechanisms for RNA sequence analysis. The model
+predicts RNA reactivity values from nucleotide sequences.
+
+Key Components:
+    - RibonanzaNet: Model for RNA reactivity prediction
+    - ConvTransformerEncoderLayer: Transformer layers with pairwise features
+    - TriangleAttention: Attention mechanism for pairwise representations
+    - TriangleMultiplicativeModule: Updates for pairwise features
+
+Note: RibonanzaNet uses different tokenization than gRNAde (ACGU vs ACGUN).
+"""
+
 import math
+from typing import Optional, Union, List, Tuple
+
 import yaml
 import torch
 import torch.nn as nn
@@ -8,34 +26,66 @@ from torch import einsum
 from einops import rearrange
 
 
+# ============================================================================
+# Configuration and Utilities
+# ============================================================================
+
 class Config:
+    """Configuration container for model hyperparameters.
+    
+    Dynamically creates attributes from keyword arguments, providing a flexible
+    way to store and access model configuration parameters.
+    
+    Args:
+        **entries: Arbitrary keyword arguments representing configuration parameters.
+    """
+    
     def __init__(self, **entries):
         self.__dict__.update(entries)
         self.entries = entries
 
     def print(self):
+        """Print all configuration entries."""
         print(self.entries)
 
 
+# ============================================================================
+# Main Model Classes
+# ============================================================================
+
 class RibonanzaNet(nn.Module):
+    """Transformer-based model for RNA reactivity prediction.
+    
+    RibonanzaNet uses a multi-layer transformer architecture with pairwise features,
+    triangular attention, and outer product updates to predict RNA reactivity values
+    from nucleotide sequences. The model incorporates both sequence-level and pairwise
+    representations for enhanced prediction accuracy.
+    
+    Architecture:
+        - Embedding layer for nucleotide sequences
+        - Multiple ConvTransformerEncoderLayers with pairwise feature updates
+        - Triangular multiplicative updates and attention mechanisms
+        - Linear decoder for reactivity prediction
+    
+    Note: Uses ACGU tokenization (different from gRNAde's ACGUN).
+    """
 
     def __init__(
         self,
-        config_filepath="config.yaml",
-        checkpoint_filepath="ribonanzanet.pt",
-        device="cpu",
+        config_filepath: str = "config.yaml",
+        checkpoint_filepath: Optional[str] = "ribonanzanet.pt",
+        device: str = "cpu",
     ):
-        """
-        This class loads the RibonanzaNet model from a configuration file and a checkpoint file,
-        and allows a user to predict the reactivity of a single sequence or a batch of sequences.
+        """Initialize RibonanzaNet model.
+        
+        Loads model configuration from YAML file and optionally loads pretrained weights.
+        Sets up transformer encoder layers, embeddings, and prediction heads.
 
         Args:
-            config_filepath: str
-                The path to the configuration file.
-            checkpoint_filepath: str
-                The path to the checkpoint file.
-            device: str
-                The device on which to run the model. Default is "cpu".
+            config_filepath: Path to the YAML configuration file containing model hyperparameters.
+            checkpoint_filepath: Path to the checkpoint file with pretrained weights.
+                Set to None to initialize without loading weights.
+            device: Device on which to run the model ('cpu', 'cuda', etc.).
         """
 
         super(RibonanzaNet, self).__init__()
@@ -83,17 +133,26 @@ class RibonanzaNet(nn.Module):
         self.device = device
 
     @torch.no_grad()
-    def predict(self, sequence):
-        """
-        Predicts the reactivity of a single sequence or a batch of sequences.
+    def predict(self, sequence: Union[str, List[str]]) -> torch.Tensor:
+        """Predict RNA reactivity for single or multiple sequences.
+        
+        This is the main inference method. Automatically handles tokenization,
+        batching, and device management. No gradients are computed.
 
         Args:
-            sequence: str or list of str
-                The sequence(s) for which to predict reactivity.
+            sequence: RNA sequence(s) as string(s) containing only ACGU characters.
+                Can be a single string or list of strings for batch prediction.
         
         Returns:
-            preds: torch.Tensor
-                The predicted reactivity.
+            Predicted reactivity values as a tensor:
+                - Shape (L,) for single sequence input
+                - Shape (B, L) for batch input
+            where L is sequence length and B is batch size.
+            
+        Example:
+            >>> model = RibonanzaNet()
+            >>> reactivity = model.predict("ACGUACGU")
+            >>> batch_reactivity = model.predict(["ACGU", "UGCA"])
         """
         if isinstance(sequence, str):
             # Single sequence
@@ -118,7 +177,30 @@ class RibonanzaNet(nn.Module):
             preds = self.forward(seq_tokenized, mask).cpu()
         return preds
 
-    def forward(self, src, src_mask=None, return_aw=False):
+    def forward(
+        self,
+        src: torch.Tensor,
+        src_mask: Optional[torch.Tensor] = None,
+        return_aw: bool = False
+    ) -> Union[torch.Tensor, Tuple[torch.Tensor, List]]:
+        """Forward pass through the RibonanzaNet model.
+        
+        Processes tokenized RNA sequences through embedding, transformer layers with
+        pairwise features, and a linear decoder to predict reactivity values.
+        
+        Args:
+            src: Tokenized input sequences of shape (B, L) where B is batch size
+                and L is sequence length. Values should be integers in [0, 3] for ACGU.
+            src_mask: Optional mask for padding tokens, shape (B, L). 1 for valid tokens,
+                0 for padding. If None, no masking is applied.
+            return_aw: If True, also return attention weights from all layers.
+                
+        Returns:
+            If return_aw is False:
+                Predicted reactivity values of shape (B, L).
+            If return_aw is True:
+                Tuple of (predictions, attention_weights_list).
+        """
         B, L = src.shape
         src = src
         src = self.encoder(src).reshape(B, L, -1)
@@ -147,6 +229,8 @@ class RibonanzaNet(nn.Module):
                         src, pairwise_features, return_aw=return_aw
                     )
 
+        # Decode to final predictions
+        # Note: pairwise_features.mean() * 0 is a gradient trick for proper backprop
         output = self.decoder(src).squeeze(-1) + pairwise_features.mean() * 0
 
         if return_aw:
@@ -155,8 +239,25 @@ class RibonanzaNet(nn.Module):
             return output
 
 
+# ============================================================================
+# Attention and Transformer Components
+# ============================================================================
+
 class TriangleAttention(nn.Module):
-    def __init__(self, in_dim=128, dim=32, n_heads=4, wise="row"):
+    """Triangle attention mechanism for pairwise representations.
+    
+    Implements axial attention over rows or columns of pairwise feature matrices,
+    as described in AlphaFold2. This allows the model to update pairwise features
+    by attending along one axis while maintaining information about the other.
+    
+    Args:
+        in_dim: Input dimension of pairwise features.
+        dim: Dimension per attention head.
+        n_heads: Number of attention heads.
+        wise: Direction of attention, either "row" or "col" for row-wise or column-wise.
+    """
+    
+    def __init__(self, in_dim: int = 128, dim: int = 32, n_heads: int = 4, wise: str = "row"):
         super(TriangleAttention, self).__init__()
         self.n_heads = n_heads
         self.wise = wise
@@ -166,9 +267,17 @@ class TriangleAttention(nn.Module):
         self.to_gate = nn.Sequential(nn.Linear(in_dim, in_dim), nn.Sigmoid())
         self.to_out = nn.Linear(n_heads * dim, in_dim)
 
-    def forward(self, z, src_mask):
-        """
-        How to do masking:
+    def forward(self, z: torch.Tensor, src_mask: torch.Tensor) -> torch.Tensor:
+        """Apply triangle attention to pairwise features.
+        
+        Args:
+            z: Pairwise features of shape (B, L, L, D).
+            src_mask: Sequence mask of shape (B, L) with 1 for valid positions, 0 for padding.
+            
+        Returns:
+            Updated pairwise features of shape (B, L, L, D).
+        
+        Masking strategy:
         For row triangular attention:
         - The attention matrix is brijh, where b is the batch, r is the row, and h is the head.
         - To create the mask, take the self-attention mask and unsqueeze it along dimensions 1 and -1.
@@ -221,7 +330,20 @@ class TriangleAttention(nn.Module):
 
 
 class TriangleMultiplicativeModule(nn.Module):
-    def __init__(self, *, dim, hidden_dim=None, mix="ingoing"):
+    """Triangle multiplicative update for pairwise features.
+    
+    Implements the triangle multiplicative update from AlphaFold2, which updates
+    pairwise features by combining information from two edges of a triangle to
+    update the third edge. This helps propagate information through the pairwise
+    representation graph.
+    
+    Args:
+        dim: Dimension of pairwise features.
+        hidden_dim: Hidden dimension for projections. Defaults to dim if not specified.
+        mix: Update direction, either "ingoing" or "outgoing" for different edge combinations.
+    """
+    
+    def __init__(self, *, dim: int, hidden_dim: Optional[int] = None, mix: str = "ingoing"):
         super().__init__()
         assert mix in {"ingoing", "outgoing"}, "mix must be either ingoing or outgoing"
 
@@ -247,7 +369,16 @@ class TriangleMultiplicativeModule(nn.Module):
         self.to_out_norm = nn.LayerNorm(hidden_dim)
         self.to_out = nn.Linear(hidden_dim, dim)
 
-    def forward(self, x, src_mask=None):
+    def forward(self, x: torch.Tensor, src_mask: Optional[torch.Tensor] = None) -> torch.Tensor:
+        """Apply triangle multiplicative update.
+        
+        Args:
+            x: Pairwise features of shape (B, L, L, D).
+            src_mask: Optional sequence mask of shape (B, L).
+            
+        Returns:
+            Updated pairwise features of shape (B, L, L, D).
+        """
         src_mask = src_mask.unsqueeze(-1).float()
         mask = torch.matmul(src_mask, src_mask.permute(0, 2, 1))
         assert x.shape[1] == x.shape[2], "feature map must be symmetrical"
@@ -278,16 +409,37 @@ class TriangleMultiplicativeModule(nn.Module):
 
 
 class ConvTransformerEncoderLayer(nn.Module):
+    """Transformer encoder layer with convolutional and pairwise feature updates.
+    
+    This layer combines:
+        - 1D convolution for local context
+        - Multi-head self-attention with pairwise bias
+        - Feedforward network
+        - Pairwise feature updates via outer product and triangle operations
+        - Optional triangle attention mechanisms
+    
+    This architecture is inspired by AlphaFold2's Evoformer blocks.
+    
+    Args:
+        d_model: Dimension of sequence representations.
+        nhead: Number of attention heads.
+        dim_feedforward: Hidden dimension of feedforward network.
+        pairwise_dimension: Dimension of pairwise features.
+        use_triangular_attention: Whether to use triangle attention in addition to
+            triangle multiplicative updates.
+        dropout: Dropout rate.
+        k: Kernel size for 1D convolution.
+    """
 
     def __init__(
         self,
-        d_model,
-        nhead,
-        dim_feedforward,
-        pairwise_dimension,
-        use_triangular_attention,
-        dropout=0.1,
-        k=3,
+        d_model: int,
+        nhead: int,
+        dim_feedforward: int,
+        pairwise_dimension: int,
+        use_triangular_attention: bool,
+        dropout: float = 0.1,
+        k: int = 3,
     ):
         super(ConvTransformerEncoderLayer, self).__init__()
         self.self_attn = MultiHeadAttention(
@@ -345,7 +497,27 @@ class ConvTransformerEncoderLayer(nn.Module):
             nn.Linear(pairwise_dimension * 4, pairwise_dimension),
         )
 
-    def forward(self, src, pairwise_features, src_mask=None, return_aw=False):
+    def forward(
+        self,
+        src: torch.Tensor,
+        pairwise_features: torch.Tensor,
+        src_mask: Optional[torch.Tensor] = None,
+        return_aw: bool = False
+    ) -> Union[Tuple[torch.Tensor, torch.Tensor], Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]:
+        """Forward pass through the transformer encoder layer.
+        
+        Args:
+            src: Sequence representations of shape (B, L, D).
+            pairwise_features: Pairwise features of shape (B, L, L, P).
+            src_mask: Optional sequence mask of shape (B, L).
+            return_aw: If True, also return attention weights.
+            
+        Returns:
+            If return_aw is False:
+                Tuple of (updated_src, updated_pairwise_features).
+            If return_aw is True:
+                Tuple of (updated_src, updated_pairwise_features, attention_weights).
+        """
 
         src = src * src_mask.float().unsqueeze(-1)
 
@@ -391,9 +563,21 @@ class ConvTransformerEncoderLayer(nn.Module):
 
 
 class MultiHeadAttention(nn.Module):
-    """Multi-Head Attention module"""
+    """Multi-Head Attention with optional pairwise bias.
+    
+    Standard multi-head attention mechanism with support for additive pairwise bias.
+    The pairwise bias allows incorporating structural information (e.g., from pairwise
+    features) into the attention computation.
+    
+    Args:
+        d_model: Model dimension.
+        n_head: Number of attention heads.
+        d_k: Dimension per head for keys and queries.
+        d_v: Dimension per head for values.
+        dropout: Dropout rate.
+    """
 
-    def __init__(self, d_model, n_head, d_k, d_v, dropout=0.1):
+    def __init__(self, d_model: int, n_head: int, d_k: int, d_v: int, dropout: float = 0.1):
         super().__init__()
 
         self.n_head = n_head
@@ -410,7 +594,27 @@ class MultiHeadAttention(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.layer_norm = nn.LayerNorm(d_model, eps=1e-6)
 
-    def forward(self, q, k, v, mask=None, src_mask=None):
+    def forward(
+        self,
+        q: torch.Tensor,
+        k: torch.Tensor,
+        v: torch.Tensor,
+        mask: Optional[torch.Tensor] = None,
+        src_mask: Optional[torch.Tensor] = None
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Apply multi-head attention.
+        
+        Args:
+            q: Query tensor of shape (B, L, D).
+            k: Key tensor of shape (B, L, D).
+            v: Value tensor of shape (B, L, D).
+            mask: Optional pairwise bias of shape (B, n_head, L, L) to add to attention logits.
+            src_mask: Optional sequence mask of shape (B, L) for padding.
+            
+        Returns:
+            Tuple of (output, attention_weights) where output has shape (B, L, D) and
+            attention_weights has shape (B, n_head, L, L).
+        """
 
         d_k, d_v, n_head = self.d_k, self.d_v, self.n_head
         sz_b, len_q, len_k, len_v = q.size(0), q.size(1), k.size(1), v.size(1)
@@ -449,14 +653,42 @@ class MultiHeadAttention(nn.Module):
 
 
 class ScaledDotProductAttention(nn.Module):
-    """Scaled Dot-Product Attention"""
+    """Scaled dot-product attention mechanism.
+    
+    Computes attention weights as softmax(QK^T / sqrt(d_k)) and applies them to values.
+    Supports additive bias and masking.
+    
+    Args:
+        temperature: Scaling factor (typically sqrt(d_k)).
+        attn_dropout: Dropout rate applied to attention weights.
+    """
 
-    def __init__(self, temperature, attn_dropout=0.1):
+    def __init__(self, temperature: float, attn_dropout: float = 0.1):
         super().__init__()
         self.temperature = temperature
         self.dropout = nn.Dropout(attn_dropout)
 
-    def forward(self, q, k, v, mask=None, attn_mask=None):
+    def forward(
+        self,
+        q: torch.Tensor,
+        k: torch.Tensor,
+        v: torch.Tensor,
+        mask: Optional[torch.Tensor] = None,
+        attn_mask: Optional[torch.Tensor] = None
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Compute scaled dot-product attention.
+        
+        Args:
+            q: Query tensor of shape (B, n_head, L, d_k).
+            k: Key tensor of shape (B, n_head, L, d_k).
+            v: Value tensor of shape (B, n_head, L, d_v).
+            mask: Optional additive bias of shape (B, n_head, L, L).
+            attn_mask: Optional multiplicative mask (1 for valid, -1 for invalid).
+            
+        Returns:
+            Tuple of (output, attention_weights) where output has shape (B, n_head, L, d_v)
+            and attention_weights has shape (B, n_head, L, L).
+        """
 
         attn = torch.matmul(q, k.transpose(2, 3)) / self.temperature
 
@@ -473,9 +705,23 @@ class ScaledDotProductAttention(nn.Module):
         return output, attn
 
 
-class PositionalEncoding(nn.Module):
+# ============================================================================
+# Positional Encoding and Feature Modules
+# ============================================================================
 
-    def __init__(self, d_model, dropout=0.1, max_len=200):
+class PositionalEncoding(nn.Module):
+    """Sinusoidal positional encoding.
+    
+    Adds position-dependent sinusoidal embeddings to sequence representations,
+    allowing the model to use sequence position information.
+    
+    Args:
+        d_model: Model dimension.
+        dropout: Dropout rate.
+        max_len: Maximum sequence length to precompute encodings for.
+    """
+
+    def __init__(self, d_model: int, dropout: float = 0.1, max_len: int = 200):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
         pe = torch.zeros(max_len, d_model)
@@ -488,18 +734,52 @@ class PositionalEncoding(nn.Module):
         pe = pe.unsqueeze(0).transpose(0, 1)
         self.register_buffer("pe", pe)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Add positional encoding to input.
+        
+        Args:
+            x: Input tensor of shape (L, B, D) or (B, L, D).
+            
+        Returns:
+            Input with positional encoding added, same shape as input.
+        """
         x = x + self.pe[: x.size(0), :]
         return self.dropout(x)
 
 
 class Outer_Product_Mean(nn.Module):
-    def __init__(self, in_dim=256, dim_msa=32, pairwise_dim=64):
+    """Outer product update for pairwise features.
+    
+    Computes an outer product between projected sequence representations to update
+    pairwise features. This operation creates pairwise information from single-sequence
+    representations, similar to AlphaFold2's outer product mean.
+    
+    Args:
+        in_dim: Input dimension of sequence representations.
+        dim_msa: Intermediate dimension after first projection.
+        pairwise_dim: Output dimension of pairwise features.
+    """
+    
+    def __init__(self, in_dim: int = 256, dim_msa: int = 32, pairwise_dim: int = 64):
         super(Outer_Product_Mean, self).__init__()
         self.proj_down1 = nn.Linear(in_dim, dim_msa)
         self.proj_down2 = nn.Linear(dim_msa**2, pairwise_dim)
 
-    def forward(self, seq_rep, pair_rep=None):
+    def forward(
+        self,
+        seq_rep: torch.Tensor,
+        pair_rep: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
+        """Compute outer product of sequence representations.
+        
+        Args:
+            seq_rep: Sequence representations of shape (B, L, D).
+            pair_rep: Optional existing pairwise features to add to. Shape (B, L, L, P).
+            
+        Returns:
+            Pairwise features of shape (B, L, L, P). If pair_rep is provided,
+            the outer product is added to it; otherwise returns just the outer product.
+        """
         seq_rep = self.proj_down1(seq_rep)
         outer_product = torch.einsum("bid,bjc -> bijcd", seq_rep, seq_rep)
         outer_product = rearrange(outer_product, "b i j c d -> b i j (c d)")
@@ -512,12 +792,30 @@ class Outer_Product_Mean(nn.Module):
 
 
 class RelativePositionalEncoding(nn.Module):
+    """Relative positional encoding for pairwise features.
+    
+    Encodes the relative distance between sequence positions as one-hot vectors,
+    which are then projected to a learned embedding. Distances are clipped to [-8, 8]
+    to limit the vocabulary size.
+    
+    Args:
+        dim: Output dimension of the positional encoding.
+    """
 
-    def __init__(self, dim=64):
+    def __init__(self, dim: int = 64):
         super(RelativePositionalEncoding, self).__init__()
         self.linear = nn.Linear(17, dim)
 
-    def forward(self, src):
+    def forward(self, src: torch.Tensor) -> torch.Tensor:
+        """Compute relative positional encodings.
+        
+        Args:
+            src: Input tensor of shape (B, L, D) used to infer batch size and length.
+            
+        Returns:
+            Relative positional encodings of shape (L, L, dim) representing the
+            learned embedding of relative distances between all position pairs.
+        """
         L = src.shape[1]
         res_id = torch.arange(L).to(src.device).unsqueeze(0)
         device = res_id.device
@@ -531,29 +829,64 @@ class RelativePositionalEncoding(nn.Module):
         return p
 
 
-def exists(val):
+# ============================================================================
+# Utility Functions and Activation Modules
+# ============================================================================
+
+def exists(val) -> bool:
+    """Check if a value is not None."""
     return val is not None
 
 
 def default(val, d):
+    """Return val if it exists, otherwise return default value d."""
     return val if exists(val) else d
 
 
 class Mish(nn.Module):
+    """Mish activation function: x * tanh(softplus(x)).
+    
+    A smooth, non-monotonic activation function that often performs better
+    than ReLU in some architectures.
+    """
     def __init__(self):
         super().__init__()
 
-    def forward(self, x):
-        # inlining this saves 1 second per epoch (V100 GPU) vs having a temp x and then returning x(!)
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Apply Mish activation.
+        
+        Note: Inlining this computation saves ~1 second per epoch on V100 GPU
+        compared to using a temporary variable.
+        """
         return x * (torch.tanh(F.softplus(x)))
 
 
-def gem(x, p=3, eps=1e-6):
+def gem(x: torch.Tensor, p: float = 3, eps: float = 1e-6) -> torch.Tensor:
+    """Generalized Mean Pooling (GeM).
+    
+    Computes (mean(x^p))^(1/p) over the last dimension. Generalizes average pooling
+    (p=1) and max pooling (p=inf).
+    
+    Args:
+        x: Input tensor.
+        p: Power parameter. Higher values approach max pooling.
+        eps: Small constant to avoid numerical issues.
+        
+    Returns:
+        Pooled tensor with last dimension reduced.
+    """
     return F.avg_pool1d(x.clamp(min=eps).pow(p), (x.size(-1))).pow(1.0 / p)
 
 
 class GeM(nn.Module):
-    def __init__(self, p=3, eps=1e-6):
+    """Generalized Mean Pooling layer with learnable power parameter.
+    
+    Args:
+        p: Initial value for the learnable power parameter.
+        eps: Small constant for numerical stability.
+    """
+    
+    def __init__(self, p: float = 3, eps: float = 1e-6):
         super(GeM, self).__init__()
         self.p = Parameter(torch.ones(1) * p)
         self.eps = eps
@@ -574,7 +907,9 @@ class GeM(nn.Module):
         )
 
 
-############################################################################################################
+# ============================================================================
+# Dropout Modules (from AlphaFold2 / OpenFold)
+# ============================================================================
 
 # Copyright 2021 AlQuraishi Laboratory
 #
@@ -598,11 +933,19 @@ from typing import Union, List
 
 
 class Dropout(nn.Module):
-    """
+    """Dropout with shared mask along specified dimensions.
+    
     Implementation of dropout with the ability to share the dropout mask
-    along a particular dimension.
+    along particular dimension(s). This is useful for applying consistent
+    dropout to entire rows or columns of pairwise features, as used in AlphaFold2.
 
-    If not in training mode, this module computes the identity function.
+    Args:
+        r: Dropout rate (probability of zeroing elements).
+        batch_dim: Dimension(s) along which the dropout mask is shared.
+            Can be a single int or list of ints.
+    
+    Note:
+        If not in training mode, this module computes the identity function.
     """
 
     def __init__(self, r: float, batch_dim: Union[int, List[int]]):
@@ -622,11 +965,14 @@ class Dropout(nn.Module):
         self.dropout = nn.Dropout(self.r)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """
+        """Apply dropout with shared mask.
+        
         Args:
-            x:
-                Tensor to which dropout is applied. Can have any shape
-                compatible with self.batch_dim
+            x: Tensor to which dropout is applied. Can have any shape
+                compatible with self.batch_dim.
+                
+        Returns:
+            Tensor with dropout applied, same shape as input.
         """
         shape = list(x.shape)
         if self.batch_dim is not None:
@@ -639,18 +985,22 @@ class Dropout(nn.Module):
 
 
 class DropoutRowwise(Dropout):
-    """
-    Convenience class for rowwise dropout as described in subsection
-    1.11.6.
+    """Rowwise dropout for pairwise features.
+    
+    Applies dropout along the row dimension (batch_dim=-3), ensuring the same
+    dropout mask is shared across all columns for each row. Used in AlphaFold2's
+    Evoformer for pairwise representation updates.
     """
 
     __init__ = partialmethod(Dropout.__init__, batch_dim=-3)
 
 
 class DropoutColumnwise(Dropout):
-    """
-    Convenience class for columnwise dropout as described in subsection
-    1.11.6.
+    """Columnwise dropout for pairwise features.
+    
+    Applies dropout along the column dimension (batch_dim=-2), ensuring the same
+    dropout mask is shared across all rows for each column. Used in AlphaFold2's
+    Evoformer for pairwise representation updates.
     """
 
     __init__ = partialmethod(Dropout.__init__, batch_dim=-2)

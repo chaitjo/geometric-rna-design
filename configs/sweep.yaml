@@ -1,7 +1,10 @@
+# Weights&Biases configuration for gRNAde training pipeline (main.py)
+# This is a sweep template for hyperparameter tuning of the gRNAde model
+
 program: main.py
 method: grid
 name: gRNAde_sweep
-description: "gRNAde W&B sweep template for reproducing benchmark results"
+description: "gRNAde W&B sweep template for hyperparameter tuning"
 
 entity: chaitjo
 project: gRNAde
@@ -14,10 +17,7 @@ parameters:
   gpu:
     value: 0
   seed:
-    values: 
-    - 0
-    - 9
-    - 42
+    value: 0
   save:
     value: True
 
@@ -33,13 +33,16 @@ parameters:
   num_posenc:
     value: 32
   max_num_conformers:
-    values: 
-    - 1
-    - 2
-    - 3
-    - 5
+    value: 1
   noise_scale:
     value: 0.1
+  drop_prob_3d:
+    values: 
+    - 0.0
+    - 0.25
+    - 0.5
+    - 0.75
+    - 1.0
   max_nodes_batch:
     value: 3000
   max_nodes_sample:
@@ -51,33 +54,38 @@ parameters:
 
   # Splitting configurations
   split:
-    values: 
-    - 'das'
-    - 'structsim_v2'
+    value: 'das'
 
   # Model configurations
   model:
-    values: 
-    - 'ARv1'
-    - 'NARv1'
+    value: 'gRNAde'
   node_in_dim:
     value: [15, 4]  # (num_bb_atoms x 5, 2 + num_bb_atoms - 1)
   node_h_dim:
-    value: [128, 16]
+    values: 
+    - [128, 16]
+    - [256, 32]
   edge_in_dim:
-    value: [131, 3]  # (num_bb_atoms x num_rbf + num_posenc + num_bb_atoms, num_bb_atoms)
+    value: [132, 3]  # (num_bb_atoms x num_rbf + num_posenc + num_bb_atoms, num_bb_atoms)
   edge_h_dim:
-    value: [64, 4]
+    values: 
+    - [64, 4]
+    - [128, 8]
   num_layers:
-    value: 4
+    values: 
+    - 3
+    - 4
   drop_rate:
-    value: 0.5
+    values:
+    - 0.0 
+    - 0.1
+    - 0.5
   out_dim:
     value: 4
 
   # Training configurations
   epochs:
-    value: 50
+    value: 100
   lr:
     value: 0.0001
   label_smoothing:
@@ -87,7 +95,7 @@ parameters:
   num_workers:
     value: 16
   val_every:
-    value: 5
+    value: 10
 
   # Evaluation configurations
   model_path:
