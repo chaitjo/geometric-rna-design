@@ -1,252 +1,145 @@
 # Generative inverse design of RNA structure and function with gRNAde
 
-An improved version of the gRNAde codebase is coming soon! Till then, check out the [new bioRxiv preprint](https://www.biorxiv.org/content/10.1101/2025.11.29.691298) where we experimentally validated gRNAde in the wet lab for a range of challenging RNA structure and function design problems. 🎉
+[![BioRxiv](https://img.shields.io/badge/bioRxiv-2025.11.29-b31b1b.svg)](https://www.biorxiv.org/content/10.1101/2025.11.29.691298)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97-Models%20%26%20Data-yellow)](https://huggingface.co/chaitjo/gRNAde)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/16rXKgbGXBBsHvS_2V84WbfKsJYf9lO4Q)
+
+**gRNAde** is a generative AI framework for RNA inverse design. 
+gRNAde learns RNA design rules from 3D RNA structures, allowing it to capture complex tertiary interactions (like pseudoknots and non-canonical base pairs) with expert-level accuracy and design functional RNAs, including aptamers and ribozymes.
+
+![gRNAde pipeline](gRNAde_pipeline.jpg)
+
+*gRNAde stands for Geometric RNA Design; pronounced as ‘grenade’*
 
 ---
 
-# gRNAde: Geometric Deep Learning for 3D RNA Inverse Design
+⚙️ **Need help with new RNA design problem?** Check out the [Example design notebook](/projects/openknot_benchmark/design.ipynb) and please [contact Chaitanya](mailto:chaitanya.joshi@cl.cam.ac.uk) for collaborations!
 
-**gRNAde** is a **g**eometric deep learning pipeline for 3D **RNA** inverse **de**sign, analogous to [ProteinMPNN](https://github.com/dauparas/ProteinMPNN) for protein design. 
+🧬 **New to 3D RNA modeling?** Check out this [curated reading and watch list](https://www.chaitjo.com/post/rna-modelling-and-design/) for beginners
 
-🧬 Tutorial notebook to get started: [gRNAde 101](/tutorial/tutorial.ipynb) <a target="_blank" href="https://colab.research.google.com/drive/16rXKgbGXBBsHvS_2V84WbfKsJYf9lO4Q">
-  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
-</a>
+🤗 **Data and Checkpoints**: [HuggingFace repository](https://huggingface.co/chaitjo/gRNAde)
 
-⚙️ Using gRNAde for custom RNA design scenarios: [Design notebook](/notebooks/design.ipynb) <a target="_blank" href="https://colab.research.google.com/drive/1ajcikLbM9v8_mYwWuZAcVP57nek6UBQD">
-  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
-</a>
+🧪 **Experimental Validation**: [Generative inverse design of RNA structure and function with gRNAde](https://www.biorxiv.org/content/10.1101/2025.11.29.691298) (bioRxiv preprint)
 
-✍️ New to 3D RNA modelling? Here's a curated reading + watch list for beginners: [Resources](https://www.chaitjo.com/post/rna-modelling-and-design/)
+📄 **Methodology**: [gRNAde: Geometric Deep Learning for 3D RNA inverse design](https://arxiv.org/abs/2305.14749) (ICLR 2025 Spotlight)
 
-📄 For more details on the methodology, see the accompanying ICLR paper: ['gRNAde: Geometric Deep Learning for 3D RNA inverse design'](https://arxiv.org/abs/2305.14749)
-> Chaitanya K. Joshi, Arian R. Jamasb, Ramon Viñas, Charles Harris, Simon Mathis, Alex Morehead, and Pietro Liò. gRNAde: Geometric Deep Learning for 3D RNA inverse design. *International Conference on Learning Representations 2025.*
->
->[PDF](https://arxiv.org/abs/2305.14749) | [Tweet](https://twitter.com/chaitjo/status/1662118334412800001) | [Slides](https://www.chaitjo.com/publication/joshi-2023-grnade/gRNAde_slides_CASP_RNA_SIG.pdf)
+## ⭐️ Key Features
 
-![](/tutorial/fig/grnade_pipeline.png)
+- **3D RNA Design:** Conditions on 3D coordinates to capture non-canonical pairings and tertiary motifs that 2D-only methods miss. Supports multi-modal design specifications including pseudoknotted secondary structures, 3D backbones, and partial sequence constraints (e.g., from fitness landscapes)
 
-gRNAde generates an RNA sequence conditioned on one or more 3D RNA backbone conformations, i.e. both single- and multi-state **fixed-backbone sequence design**.
-RNA backbones are featurized as geometric graphs and processed via a multi-state GNN encoder which is equivariant to 3D roto-translation of coordinates as well as conformer order, followed by conformer order-invariant pooling and sequence design.
+- **Expert-Level Accuracy on Pseudoknots:** Matches human expert performance on the Eterna OpenKnot Benchmark while being fully automated.
 
-## Installation
+- **Functional Design Campaigns:** Capable of generating active ribozyme variants with high sequence divergence from the wild type.
 
-In order to get started, set up a python environment by following the installation instructions below. 
-We have tested gRNAde on Linux with Python 3.10.12 and CUDA 11.8 on NVIDIA A100 80GB GPUs and Intel XPUs, as well as on MacOS (CPU).
-```sh
-# Clone gRNAde repository
-cd ~  # change this to your prefered download location
-git clone https://github.com/chaitjo/geometric-rna-design.git
-cd geometric-rna-design
+- **High-Throughput Pipeline with Screening:** Includes built-in wrappers for RibonanzaNet and RhoFold to generate and filter millions of candidates automatically.
 
-# Install mamba (a faster conda)
-wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
-bash Miniforge3-Linux-x86_64.sh
-source ~/.bashrc
-# You may also use conda or virtualenv to create your environment
+## 🚀 Getting Started
 
-# Create new environment and activate it
-mamba create -n rna python=3.10
-mamba activate rna
-```
+### 1. **Installation:** 
 
-Set up your new python environment, starting with PyTorch and PyG:
-```sh
-# Install Pytorch on Nvidia GPUs (ensure appropriate CUDA version for your hardware)
-mamba install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
+Set up your Python environment, install dependencies, and download checkpoints from HuggingFace following the instructions in [`docs/installation.md`](docs/installation.md).
 
-# Install Pytorch Geometric (ensure matching torch + CUDA version to PyTorch)
-pip install torch_geometric
-pip install torch_scatter torch_cluster -f https://data.pyg.org/whl/torch-2.1.2+cu118.html
-```
-<details>
-<summary>Install Pytorch/PyG on Intel XPUs (specific to Cambridge's Dawn supercomputer)</summary>
+### 2. **Datasets:** 
 
-```sh
-module load default-dawn
-source /usr/local/dawn/software/external/intel-oneapi/2024.0/setvars.sh
-export ZE_FLAT_DEVICE_HIERARCHY=COMPOSITE
-python -m pip install torch==2.1.0a0 torchvision==0.16.0a0 torchaudio==2.1.0a0 intel-extension-for-pytorch==2.1.10+xpu --extra-index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/us/
-pip install torch_scatter torch_cluster
-```
+Optionally, download pre-processed datasets and/or raw 3D structures from HuggingFace, following the instructions in [`docs/data_setup.md`](docs/data_setup.md). This data can be used for training new gRNAde models.
 
-</details>
-<br>
+### 3. **Training Models:** 
 
-Next, install other compulsory dependencies:
-```sh
-# Install other python libraries
-mamba install jupyterlab matplotlib seaborn pandas biopython biotite -c conda-forge
-pip install wandb gdown pyyaml ipdb python-dotenv tqdm cpdb-protein torchmetrics einops ml_collections mdanalysis MDAnalysisTests draw_rna arnie
+The [`main.py`](main.py) script can be used to train new gRNAde models. Simply run:
+  ```sh
+  python main.py --config configs/default.yaml
+  ```
 
-# Install X3DNA for secondary structure determination
-cd ~/geometric-rna-design/tools/
-tar -xvzf x3dna-v2.4-linux-64bit.tar.gz
-./x3dna-v2.4/bin/x3dna_setup
-# Follow the instructions to test your installation
+The `src` directory houses all the code for the gRNAde design pipeline. The codebase is integrated with Weights&Biases for logging as well as hyperparameter tuning/running sweeps.
 
-# Install EternaFold for secondary structure prediction
-cd ~/geometric-rna-design/tools/
-git clone --depth=1 https://github.com/eternagame/EternaFold.git && cd EternaFold/src
-make
-# Notes: 
-# - Multithreaded version of EternaFold did not install for me
-# - To install on MacOS, start a shell in Rosetta using `arch -x86_64 zsh`
+### 4. **Running the gRNAde Design Pipeline:** 
 
-# Download RhoFold checkpoint (~500MB)
-cd ~/geometric-rna-design/tools/rhofold/
-gdown https://drive.google.com/uc?id=1To2bjbhQLFx1k8hBOW5q1JFq6ut27XEv
-```
+The fastest way to get started is with the [`design.py`](design.py) command-line script, which provides a production-ready interface for the complete design workflow:
+  ```sh
+  python design.py --config configs/design.yaml
+  ```
 
-<details>
-<summary>Optionally, you can also set up some extra tools and dependencies.</summary>
+This automated pipeline will:
+- Load model checkpoints and target structures
+- Generate diverse candidate sequences with gRNAde (conditioned on 3D coordinates, secondary structure, and optional sequence constraints)
+- Screen candidates with RibonanzaNet for structural accuracy
+- Filter and rank designs based on configurable metrics
+- Save top designs for experimental validation
+  
+See [`docs/creating_designs.md`](docs/creating_designs.md) for detailed documentation, configuration options, and best practices. 
+  
+For interactive exploration and customization, see the [example design notebook](projects/openknot_benchmark/design.ipynb).
 
-```sh
-# (Optional) Install CD-HIT for sequence identity clustering
-mamba install cd-hit -c bioconda
+### 5. **Reproducing Design Campaigns:** 
 
-# (Optional) Install US-align/qTMclust for structural similarity clustering
-cd ~/geometric-rna-design/tools/
-git clone https://github.com/pylelab/USalign.git && cd USalign/ && git checkout 97325d3aad852f8a4407649f25e697bbaa17e186
-g++ -static -O3 -ffast-math -lm -o USalign USalign.cpp
-g++ -static -O3 -ffast-math -lm -o qTMclust qTMclust.cpp
+All design campaigns from the paper are available in the `projects/` directory with complete code and step-by-step READMEs to reproduce results and generate figures:
+- `projects/openknot_benchmark/`: Eterna OpenKnot designs for riboswitches, ribozymes, viral elements, and other complex RNA pseudoknot structures.
+- `projects/rna_polymerase_ribozyme/`: Functional RNA polymerase ribozyme engineering campaign.
 
-# (Optional) Install ViennaRNA, mainly used for plotting in design notebook
-cd ~/geometric-rna-design/tools/
-tar -zxvf ViennaRNA-2.6.4.tar.gz
-cd ViennaRNA-2.6.4
-./configure  # ./configure --enable-macosx-installer
-make
-sudo make install
-```
+### 6. **Reproducing ICLR 2025 Paper Benchmarks:** 
 
-</details>
-<br>
+The codebase corresponds to the first stable, experimentally validated version of gRNAde (`v1.0.0`) used in "[Generative inverse design of RNA structure and function with gRNAde](https://www.biorxiv.org/content/10.1101/2025.11.29.691298)".
+All the code and data used for the previous [ICLR 2025 Spotlight paper](https://openreview.net/forum?id=lvw3UgeVxS) introducing the gRNAde methodology is available in release `v0.3.2`, with detailed instructions for reproducing the computational benchmarks: https://github.com/chaitjo/geometric-rna-design/releases/tag/v0.3.2
 
-Once your python environment is set up, create your `.env` file with the appropriate environment variables; see the .env.example file included in the codebase for reference. 
-```sh
-cd ~/geometric-rna-design/
-touch .env
-```
+## 📂 Directory Structure
 
-You're now ready to use gRNAde via [the tutorial](/tutorial/tutorial.ipynb).
-In order to train your own models from scratch though, you still need to download and process raw RNA structures from RNAsolo ([instructions below](#downloading-data)).
-
-
-## Directory Structure and Usage
-
-Detailed usage instructions are available in [the tutorial notebook](/tutorial/tutorial.ipynb).
-
-```
+```markdown
 .
 ├── README.md
 ├── LICENSE
 |
-├── gRNAde.py                       # gRNAde python module and command line utility
 ├── main.py                         # Main script for training and evaluating models
+├── design.py                       # Command-line script for RNA sequence design
 |
 ├── .env.example                    # Example environment file
 ├── .env                            # Your environment file
 |
-├── checkpoints                     # Saved model checkpoints
+├── checkpoints                     # Model checkpoints
 ├── configs                         # Configuration files directory
 ├── data                            # Dataset and data files directory
-├── notebooks                       # Directory for Jupyter notebooks
-├── tutorial                        # Tutorial with example usage
+├── wandb                           # W&B output directory
+|
+├── docs                            # Documentation directory
+|   ├── creating_designs.md         # Guide to using design.py for RNA design
+|   ├── installation.md             # Installation instructions
+|   └── data_setup.md               # Data preparation guide
 |
 ├── tools                           # Directory for external tools
-|   ├── draw_rna                    # RNA secondary structure visualization
-|   ├── EternaFold                  # RNA sequence to secondary structure prediction tool
-|   ├── RhoFold                     # RNA sequence to 3D structure prediction tool
+|   ├── rhofold                     # RNA sequence to 3D structure prediction tool
 |   ├── ribonanzanet                # RNA sequence to chemical mapping prediction tool
-|   └── x3dna-v2.4                  # RNA secondary structure determination from 3D
+|   └── ribonanzanet_sec_struct     # RNA sequence to pseudoknotted secondary structure prediction tool
 |
-└── src                             # Source code directory
-    ├── constants.py                # Constant values for data, paths, etc.
-    ├── evaluator.py                # Evaluation loop and metrics
-    ├── layers.py                   # PyTorch modules for building Multi-state GNN models
-    ├── models.py                   # Multi-state GNN models for gRNAde
-    ├── trainer.py                  # Training loop
-    |
-    └── data                        # Data-related code
-        ├── clustering_utils.py     # Methods for clustering by sequence and structural similarity
-        ├── data_utils.py           # Methods for loading PDB files and handling coordinates
-        ├── dataset.py              # Dataset and batch sampler class
-        ├── featurizer.py           # Featurizer class
-        └── sec_struct_utils.py     # Methods for secondary structure prediction and determination
+├── src                             # Source code directory for gRNAde
+|   ├── constants.py                # Constant values for data, paths, etc.
+|   ├── evaluator.py                # Evaluation metrics and computational filtering pipeline
+|   ├── layers.py                   # PyTorch modules for building gRNAde models
+|   ├── models.py                   # Main gRNAde model code
+|   ├── trainer.py                  # Training loop for gRNAde
+|   |
+|   └── data                        # Data-related code
+|       ├── clustering_utils.py     # Methods for clustering by sequence and structural similarity
+|       ├── data_utils.py           # Methods for loading PDB files and handling coordinates
+|       ├── dataset.py              # Dataset and batch sampler class
+|       ├── featurizer.py           # Featurizer class
+|       └── sec_struct_utils.py     # Methods for secondary structure prediction and determination
+|
+└── projects                        # Code for reproducing design campaigns in the paper
+    ├── openknot_benchmark          # Eterna OpenKnot Benchmark for psuedoknotted RNA design
+    └── rna_polymerase_ribozyme     # Generative Design of RNA polymerase ribozymes
 ```
 
+## Citations
 
-
-## Downloading and Preparing Data
-
-gRNAde is trained on all RNA structures from the PDB at ≤4A resolution (12K 3D structures from 4.2K unique RNAs) downloaded via [RNASolo](https://rnasolo.cs.put.poznan.pl) with date cutoff: 31 October 2023.
-If you would like to train your own models from scratch, download and extract the raw `.pdb` files via the following script into the `data/raw/` directory (or another location indicated by the `DATA_PATH` environment variable in your `.env` file).
-
-🚨 **Note:** Alternatively to the instructions below, you can download a pre-processed [`.pt`](https://drive.google.com/file/d/1gcUUaRxbGZnGMkLdtVwAILWVerVCbu4Y/view?usp=sharing) file and [`.csv`](https://drive.google.com/file/d/1lbdiE1LfWPReo5VnZy0zblvhVl5QhaF4/view?usp=sharing) metadata, and place them into the `data/` directory.
-
-**Method 1: Script**
-
-```sh
-# Download structures in PDB format from RNAsolo (31 October 2023 cutoff)
-mkdir ~/geometric-rna-design/data/raw
-cd ~/geometric-rna-design/data/raw
-gdown https://drive.google.com/uc?id=10NidhkkJ-rkbqDwBGA_GaXs9enEBJ7iQ
-tar -zxvf RNAsolo_31102023.tar.gz
 ```
-<details>
-<summary>Older instuctions for downloading from RNAsolo (not working)</summary>
-
-```sh
-curl -O https://rnasolo.cs.put.poznan.pl/media/files/zipped/bunches/pdb/all_member_pdb_4_0__3_300.zip
-unzip all_member_pdb_4_0__3_300.zip
-rm all_member_pdb_4_0__3_300.zip
-```
-
-</details>
-
-> RNAsolo recently stopped hosting downloads for older versions, such as the 31 October 2023 cutoff that we used in our current work, so you can download the exact data we used via our [Google Drive link](https://drive.google.com/file/d/10NidhkkJ-rkbqDwBGA_GaXs9enEBJ7iQ/).
-
-**Method 2: Manual**
-
-Manual download link: https://rnasolo.cs.put.poznan.pl/archive.
-Select the following for creating the download: 3D (PDB) + all molecules + all members + res. ≤4.0
-
-Next, process the raw PDB files into our ML-ready format, which will be saved under `data/processed.pt`. 
-You need to install the optional dependencies (US-align, CD-HIT) for processing.
-```sh
-# Process raw data into ML-ready format (this may take several hours)
-cd ~/geometric-rna-design/
-python data/process_data.py
-```
-
-Each RNA will be processed into the following format (most of the metadata is optional for simply using gRNAde):
-```
-{
-    'sequence'                   # RNA sequence as a string
-    'id_list'                    # list of PDB IDs
-    'coords_list'                # list of structures, i.e. 3D coordinates of shape ``(length, 27, 3)``
-    'sec_struct_list'            # list of secondary structure strings in dotbracket notation
-    'sasa_list'                  # list of per-nucleotide SASA values
-    'rfam_list'                  # list of RFAM family IDs
-    'eq_class_list'              # list of non-redundant equivalence class IDs
-    'type_list'                  # list of structure types (RNA-only, RNA-protein complex, etc.)
-    'rmsds_list'                 # dictionary of pairwise C4' RMSD values between structures
-    'cluster_seqid0.8'           # cluster ID of sequence identity clustering at 80%
-    'cluster_structsim0.45'      # cluster ID of structure similarity clustering at 45%
+@article{joshi2025generative,
+  title={Generative inverse design of RNA structure and function with g{RNA}de},
+  author={Joshi, Chaitanya K and Gianni, Edoardo and Kwok, Samantha LY and Mathis, Simon V and Lio, Pietro and Holliger, Philipp},
+  journal={bioRxiv},
+  year={2025},
+  publisher={Cold Spring Harbor Laboratory}
 }
-```
 
-## Splits for Benchmarking
-
-We have provided the splits used in our experiments in the `data/` directory:
-- Single-state split from [Das et al., 2010](https://www.nature.com/articles/nmeth.1433): `data/das_split.pt` (called the Das split for compatibility with older code)
-- Multi-state split of structurally flexible RNAs: `data/structsim_split_v2.pt` (Note that we have deprecated an older version of the multi-state split)
-
-The precise procedure for creating the splits (which can be used to modify and customise them) can be found in the `notebooks/` directory. The exact PDB IDs used for each of the splits are also available in the `data/split_ids/` directory, in case you are using a different version of RNAsolo after the 31 October 2023 cutoff.
-
-## Citation
-
-```
 @inproceedings{joshi2025grnade,
   title={g{RNA}de: Geometric Deep Learning for 3D RNA inverse design},
   author={Joshi, Chaitanya K and Jamasb, Arian R and Vi{\~n}as, Ramon and Harris, Charles and Mathis, Simon V and Morehead, Alex and Anand, Rishabh and Li{\`o}, Pietro},

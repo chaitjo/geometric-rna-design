@@ -31,7 +31,7 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 
 keep_insertions = True
-keep_pseudoknots = False
+keep_pseudoknots = True
 
 
 if __name__ == "__main__":

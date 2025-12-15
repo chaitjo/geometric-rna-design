@@ -1,12 +1,16 @@
 # Custom
-/notebooks/designs/
-/tools
+.DS_Store
 /data
+/archive
+/checkpoints
+/logs
 /wandb
 /slurm
+projects/openknot_benchmark/OpenKnotBench_data.*.csv
+projects/openknot_benchmark/designs/*
+projects/rna_polymerase_ribozyme/demultiplexed_reads_merged/rctrim/*
+machine.file.*
 arnie_file.txt
-.DS_Store
-# *.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -160,3 +164,4 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
+.vscode/settings.json
